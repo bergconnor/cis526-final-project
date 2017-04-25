@@ -4,7 +4,7 @@
 
 "use strict";
 
-// constants
+// Constants
 var PORT = 3000;
 
 // requires
@@ -20,8 +20,8 @@ var router = new (require('./lib/route')).Router(db);
 fileserver.loadDir('public');
 
 // Define our routes
-var project = require('./src/resource/project');
-router.resource('/projects', project);
+// var project = require('./src/resource/project');
+// router.resource('/projects', project);
 
 var server = new http.Server(function(req, res) {
   // Remove the leading '/' from the resource url
