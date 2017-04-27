@@ -1,9 +1,7 @@
 CREATE TABLE users (
   id INTEGER PRIMARY KEY,
-  eid TEXT UNIQUE,
+  email TEXT UNIQUE,
+  username TEXT UNIQUE,
   cryptedPassword TEXT,
-  salt TEXT,
-  firstName TEXT,
-  lastName TEXT,
-  email TEXT
+  salt TEXT
 )

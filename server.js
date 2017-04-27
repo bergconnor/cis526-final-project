@@ -20,8 +20,10 @@ var router = new (require('./lib/route')).Router(db);
 fileserver.loadDir('public');
 
 // Define our routes
-// var project = require('./src/resource/project');
-// router.resource('/projects', project);
+var user = require('./src/resource/user');
+var session = require('./src/resource/session');
+router.resource('/users', user);
+router.resource('/sessions', session);
 
 var server = new http.Server(function(req, res) {
   // Remove the leading '/' from the resource url
@@ -39,4 +41,7 @@ var server = new http.Server(function(req, res) {
 // Launch the server
 server.listen(PORT, function(){
   console.log("listening on port " + PORT);
+  db.all('SELECT * from users', function(err, table) {
+    console.log(table);
+  });
 });

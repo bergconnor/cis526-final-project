@@ -8,19 +8,19 @@ destroy: destroy,
 loginRequired: loginRequired
 }
 
-var json = require('./../../lib/form-json');
-var json = require('./../../lib/encryption');
+var urlencoded = require('./../../lib/form-urlencoded');
+var encryption = require('./../../lib/encryption');
 
 /** @function create
 * creates a new session
 */
 function create(req, res, db) {
-json(req, res, function(req, res) {
+urlencoded(req, res, function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
+  console.log(username);
   db.get("SELECT * FROM users WHERE username=?", [username], function(err, user) {
     if(err) {
-      console.error(err);
       res.statusCode = 500;
       res.end("Server error");
       return;
@@ -40,7 +40,7 @@ json(req, res, function(req, res) {
     } else {
       // successful login
       // encrypt user.id and store in the cookies
-      var cookieData = JSON.stringify(){userId: user.id});
+      var cookieData = JSON.stringify({userId: user.id});
       var encryptedCookie = encryption.encipher(cookieData);
       res.setHeader("Set-Cookie", ["session=" + encryptedCookie]);
       res.statusCode = 200;
@@ -63,14 +63,14 @@ res.end("Logged out successfully");
 *
 */
 function loginRequired(req, res, next) {
-var session = req.headers.cookie.session;
-var sessionData = encryption.decipher(session);
-var sessionObj = JSON.parse(sessionData);
-if(sessionObj.userId) {
-  req.currentUserId = sessionObj.userId;
-  return next(req, res);
-} else {
-  res.statusCode = 403;
-  res.end("Authentication required");
-}
+  var session = req.headers.cookie.session;
+  var sessionData = encryption.decipher(session);
+  var sessionObj = JSON.parse(sessionData);
+  if(sessionObj.userId) {
+    req.currentUserId = sessionObj.userId;
+    return next(req, res);
+  } else {
+    res.statusCode = 403;
+    res.end("Authentication required");
+  }
 }
