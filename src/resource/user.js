@@ -40,7 +40,7 @@ function create(req, res, db) {
   urlencoded(req, res, function(req, res) {
     var user = req.body;
     var salt = encryption.salt();
-    var cryptedPassword = encryption.digest(user.passworsd + salt);
+    var cryptedPassword = encryption.digest(user.password + salt);
     db.run('INSERT INTO users (email, username, cryptedPassword, salt) VALUES (?, ?, ?, ?)', [
       user.email,
       user.username,

@@ -7,8 +7,12 @@
     <h1>Sign Up</h1>
     <form id="sign-up-form" method="post" action="/">
       <p>
+        <label for="email">Email:</label>
+        <input name="email" type="email" style="text-transform:lowercase"/>
+      </p>
+      <p>
         <label for="username">Username:</label>
-        <input name="username" type="text"/>
+        <input name="username" type="text" style="text-transform:lowercase"/>
       </p>
       <p>
         <label for="password">Password:</label>
@@ -19,11 +23,7 @@
         <input name="verify-password" type="password"/>
       </p>
       <p>
-        <label for="email">Email:</label>
-        <input name="email" type="email"/>
-      </p>
-      <p>
-        <button type="submit">Log In</button>
+        <button type="submit">Sign Up</button>
       </p>
     </form>
     <script

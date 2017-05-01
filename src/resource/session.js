@@ -18,7 +18,6 @@ function create(req, res, db) {
 urlencoded(req, res, function(req, res) {
   var username = req.body.username;
   var password = req.body.password;
-  console.log(username);
   db.get("SELECT * FROM users WHERE username=?", [username], function(err, user) {
     if(err) {
       res.statusCode = 500;
@@ -32,6 +31,7 @@ urlencoded(req, res, function(req, res) {
       return;
     }
     var cryptedPassword = encryption.digest(password + user.salt);
+    console.log(cryptedPassword);
     if(cryptedPassword != user.cryptedPassword) {
       // invalid password/username combination
       res.statusCode = 403;
