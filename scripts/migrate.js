@@ -4,9 +4,6 @@ var db = new sqlite3.Database('reddit.sqlite3', function(err) {
   if(err) console.error(err);
 });
 
-db.run("DROP TABLE IF EXISTS migrations");
-db.run("DROP TABLE IF EXISTS users");
-
 // Run the migrations
 var migrate = require('../lib/migrate');
 migrate(db, 'migrations', function(err){

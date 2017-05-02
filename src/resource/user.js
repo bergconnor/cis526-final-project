@@ -33,7 +33,7 @@ function list(req, res, db) {
       res.setHeader("Content-Type", "text/json");
       res.end(JSON.stringify(users));
     });
-  // });
+  //\ });
 }
 
 function create(req, res, db) {
