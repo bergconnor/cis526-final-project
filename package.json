@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "node scripts/migrate.js",
+    "drop": "node scripts/drop-migrations.js",
     "start": "node server.js"
   },
   "repository": {

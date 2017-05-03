@@ -1,4 +1,4 @@
-/** @module sessions
+/** @module session
 * a module represesnting a user session
 */
 

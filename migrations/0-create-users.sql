@@ -4,4 +4,4 @@ CREATE TABLE users (
   username TEXT UNIQUE,
   cryptedPassword TEXT,
   salt TEXT
-)
+);

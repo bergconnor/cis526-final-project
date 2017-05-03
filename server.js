@@ -23,9 +23,11 @@ var router = new (require('./lib/route')).Router(db);
 fileserver.loadDir('public');
 
 // Define our routes
+var post = require('./src/resource/post');
 var subpage = require('./src/resource/subpage');
 var user = require('./src/resource/user');
 var session = require('./src/resource/session');
+router.resource('/posts', post);
 router.resource('/subpages', subpage);
 router.resource('/users', user);
 router.resource('/sessions', session);
@@ -70,7 +72,7 @@ var server = new http.Server(function(req, res) {
 // Launch the server
 server.listen(PORT, function(){
   console.log("listening on port " + PORT);
-  // db.all('SELECT * from users', function(err, table) {
+  // db.all('SELECT * from posts', function(err, table) {
   //   console.log(table);
   // });
 });

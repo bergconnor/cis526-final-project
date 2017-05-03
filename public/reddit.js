@@ -1,3 +1,12 @@
+function getCryptedCookie() {
+  var value = "; " + document.cookie;
+  var parts = value.split("; encryptedSession=");
+  var cryptedCookie = "";
+  if(parts.length == 2) {
+    return parts.pop().split(";").shift();
+  }
+}
+
 $('#login-form').on('submit', (event) => {
   event.preventDefault();
   var user = $("#login-form :input").serialize();
@@ -64,19 +73,30 @@ if($('#subpage-list').length > 0) {
           $('#subpage-content').empty();
           $('<h1>').text(subpage.name).appendTo('#subpage-content');
           $('<p>').text(subpage.description).appendTo('#subpage-content');
+          $.get('/posts/' + subpage.id + '/subpage', (posts) => {
+            posts.forEach(function(post) {
+              $('<img>').attr('src', post.media).appendTo('#subpage-content');
+            });
+          });
+          $('#subpage-form').load('post-form.html').on('submit', (event) => {
+            event.preventDefault();
+            var post = new FormData($('form')[0]);
+            post.append('subpage_id', subpage.id);
+            console.log(post);
+            $.post({
+              url: '/posts/',
+              data: post,
+              contentType: false,
+              processData: false,
+              success: function() {
+                window.location.replace('/home.html');
+              }
+            });
+          });
         }).appendTo('#subpage-list');
       });
     }).fail(function() {
       alert('Failed to load subpage');
     });
   });
-}
-
-function getCryptedCookie() {
-  var value = "; " + document.cookie;
-  var parts = value.split("; encryptedSession=");
-  var cryptedCookie = "";
-  if(parts.length == 2) {
-    return parts.pop().split(";").shift();
-  }
 }

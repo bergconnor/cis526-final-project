@@ -1,6 +1,6 @@
 "use strict";
 
-/** @module project
+/** @module user
  * A RESTful resource representing a user
  * implementing the CRUD methods.
  */
