@@ -10,25 +10,20 @@
     <link href="/style.css" type="text/css" rel="stylesheet">
   </head>
   <body>
-    <!-- <ul class="my-ul-class">
-      <li class="my-li-class">
-        <a href="/">Funny</a>
-      </li>
-      <li class="my-li-class">
-        <span class="separator">-</span>
-        <a href="/">NFL</a>
-      </li>
-      <li class="my-li-class">
-        <span class="separator">-</span>
-        <a href="/">Soccer</a>
-      </li>
-    </ul> -->
-    <ul id="subpage-list" class="subpage-nav"></ul>
-    <a id="login-logout-link" href="/"></a>
-    <a id="sign-up-link" href="/sign-up.html">Sign Up</a>
-    <a id="add-subpage-link" href="/add-subpage.html">Add Subpage</a>
-    <div id="subpage-content"></div>
-    <div id="subpage-form"></div>
+    <h1>Login</h1>
+    <form id="login-form" method="POST" action="/">
+      <p>
+        <label for="username">Username:</label>
+        <input name="username" type="text" style="text-transform:lowercase"/>
+      </p>
+      <p>
+        <label for="password">Password:</label>
+        <input name="password" type="password"/>
+      </p>
+      <p>
+        <button type="submit">Log In</button>
+      </p>
+    </form>
     <script
       src="https://code.jquery.com/jquery-3.2.1.js"
       integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
@@ -39,6 +34,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
       integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
       crossorigin="anonymous"></script>
-    <script src="/reddit.js" type="text/javascript"></script>
+    <script src="/login.js" type="text/javascript"></script>
   </body>
 </html>

@@ -1,0 +1,21 @@
+img {
+  width: 250px;
+}
+
+video {
+  width: 250px;
+}
+
+a.active {
+  color: red;
+}
+
+.subpage-nav {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.subpage-nav-item {
+  display: inline;
+}

@@ -1,6 +1,9 @@
+"use strict";
+
 /** @module session
-* a module represesnting a user session
-*/
+ * A RESTful resource representing a session
+ * implementing the CRUD methods.
+ */
 
 module.exports = {
   create: create,
@@ -8,12 +11,16 @@ module.exports = {
   loginRequired: loginRequired
 }
 
+// requires
 var urlencoded = require('./../../lib/form-urlencoded');
 var encryption = require('./../../lib/encryption');
 
 /** @function create
-* creates a new session
-*/
+ * Creates a new session and adds it to the database.
+ * @param {http.incomingRequest} req - the request object
+ * @param {http.serverResponse} res - the response object
+ * @param {sqlite3.Database} db - the database object
+ */
 function create(req, res, db) {
   urlencoded(req, res, function(req, res) {
     var username = req.body.username;
@@ -49,9 +56,12 @@ function create(req, res, db) {
   });
 }
 
-/** @function destroy
-* destroys a session
-*/
+/** @destroy
+ * Removes the specified session from the database.
+ * @param {http.incomingRequest} req - the request object
+ * @param {http.serverResponse} res - the response object
+ * @param {sqlite3.Database} db - the database object
+ */
 function destroy(req, res) {
   res.setHeader("Set-Cookie", [req.params.id + "=; Path=/;"]);
   res.statusCode = 200;

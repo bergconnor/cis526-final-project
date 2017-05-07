@@ -3,6 +3,7 @@ CREATE TABLE posts (
   subpage_id INTEGER,
   title TEXT,
   content TEXT,
-  media TEXT,
+  filename TEXT,
+  fileType TEXT,
   FOREIGN KEY (subpage_id) REFERENCES subpages(id)
 );

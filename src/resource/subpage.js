@@ -8,10 +8,12 @@
 module.exports = {
   list: list,
   create: create,
+  read: read,
   update: update,
-  read: read
+  destroy: destroy
 }
 
+// requires
 var urlencoded = require('./../../lib/form-urlencoded');
 
 /** @function list
@@ -57,20 +59,6 @@ function create(req, res, db) {
   });
 }
 
-/** @update
- * Updates a specific subpage with the supplied values
- * @param {http.incomingRequest} req - the request object
- * @param {http.serverResponse} res - the response object
- * @param {sqlite3.Database} db - the database object
- */
-function update(req, res, db) {
-  var id = req.params.id;
-  db.get('SELECT name, description FROM subpages where id=?', [id], function(subpage) {
-    res.setHeader("Content-Type", "text/json");
-    res.end(JSON.stringify(subpage));
-  });
-}
-
 /** @function read
  * Serves a specific subpage as a JSON string
  * @param {http.incomingRequest} req - the request object
@@ -96,8 +84,22 @@ function read(req, res, db) {
   });
 }
 
+/** @update
+ * Updates a specific subpage with the supplied values
+ * @param {http.incomingRequest} req - the request object
+ * @param {http.serverResponse} res - the response object
+ * @param {sqlite3.Database} db - the database object
+ */
+function update(req, res, db) {
+  var id = req.params.id;
+  db.get('SELECT name, description FROM subpages where id=?', [id], function(subpage) {
+    res.setHeader("Content-Type", "text/json");
+    res.end(JSON.stringify(subpage));
+  });
+}
+
 /** @destroy
- * Removes the specified project from the database.
+ * Removes the specified subpage from the database.
  * @param {http.incomingRequest} req - the request object
  * @param {http.serverResponse} res - the response object
  * @param {sqlite3.Database} db - the database object

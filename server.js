@@ -4,11 +4,11 @@
 
 "use strict";
 
-// Constants
+// constants
 var PORT = 3000;
 var SESSION = "encryptedSession";
 
-// Requires
+// requires
 var http = require('http');
 var encryption = require('./lib/encryption');
 var parseCookie = require('./lib/cookie-parser');
@@ -19,10 +19,11 @@ var db = new sqlite3.Database('reddit.sqlite3', function(err) {
 });
 var router = new (require('./lib/route')).Router(db);
 
-// Cache static directory in the fileserver
+// cache static directories in the fileserver
 fileserver.loadDir('public');
+fileserver.loadDir('views');
 
-// Define our routes
+// define our routes
 var post = require('./src/resource/post');
 var subpage = require('./src/resource/subpage');
 var user = require('./src/resource/user');
@@ -33,43 +34,40 @@ router.resource('/users', user);
 router.resource('/sessions', session);
 
 var server = new http.Server(function(req, res) {
-  // We need to determine if there is a logged-in user.
-  // We'll check for a session cookie
+  // check for a session cookie to determine
+  // if a user is logged in
   var cookies = parseCookie(req.headers.cookie);
 
-  // To better protect against manipulation of the session
-  // cookie, we encrypt it before sending it to the
-  // client.  Therefore, the cookie they send back is
-  // likewise encrypted, and must be decrypted before
-  // we can make sense of it.
+  // encrypt session cookie before sending to client
   var encryptedSession = cookies[SESSION];
 
-  // There may not yet be a session
+  // check if a session exists
   if(!encryptedSession) {
     // if not, set req.session to be empty
     req.session = {}
   } else {
     // if so, the session is encrypted, and must be decrypted
     var sessionData = encryption.decipher(encryptedSession);
+
     // further, it is in JSON form, so parse it and set the
     // req.session object to be its parsed value
     req.session = JSON.parse(sessionData);
   }
 
-  // Remove the leading '/' from the resource url
+  // remove the leading '/' from the resource url
   var resource = req.url.slice(1);
-  // console.log(resource + ' --> ', req.headers.cookie);
-  // If no resource is requested, serve the cached index page.
+
+  // if no resource is requested, serve the cached index page.
   if(resource == '')
     fileserver.serveFile('/index.html', req, res);
-  // If the resource is cached in the fileserver, serve it
+  // if the resource is cached in the fileserver, serve it
   else if(fileserver.isCached(resource))
     fileserver.serveFile(resource, req, res);
-  // Otherwise, route the request
+  // otherwise, route the request
   else router.route(req, res);
 });
 
-// Launch the server
+// launch the server
 server.listen(PORT, function(){
   console.log("listening on port " + PORT);
   // db.all('SELECT * from posts', function(err, table) {

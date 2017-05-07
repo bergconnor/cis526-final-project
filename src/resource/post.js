@@ -8,12 +8,16 @@
 module.exports = {
   list: list,
   create: create,
-  update: update,
   read: read,
+  update: update,
+  destroy: destroy,
   listBySubpage: listBySubpage
 }
 
-var multipart = require('./../../lib/form-multipart');
+var path = require('path');
+var formidable = require('formidable');
+var fs = require('fs');
+var media = require('./../../lib/media');
 
 /** @function list
  * Sends a list of all posts as a JSON array.
@@ -40,37 +44,57 @@ function list(req, res, db) {
  * @param {sqlite3.Database} db - the database object
  */
 function create(req, res, db) {
-  multipart(req, res, function(req, res) {
-    var post = req.body;
-    db.run('INSERT INTO posts (subpage_id, title, content, media) VALUES (?, ?, ?, ?)', [
-      post.subpage_id,
-      post.title,
-      post.content,
-      post.media.filename
-    ], function(err) {
-      if(err) {
-        res.statusCode = 500;
-        res.end("Server error");
-        return;
-      }
-      res.statusCode = 200;
-      res.end("Post created");
-    }
-  )
-  });
-}
+  // create an incoming form object
+  var form = new formidable.IncomingForm();
 
-/** @update
- * Updates a specific post with the supplied values
- * @param {http.incomingRequest} req - the request object
- * @param {http.serverResponse} res - the response object
- * @param {sqlite3.Database} db - the database object
- */
-function update(req, res, db) {
-  var id = req.params.id;
-  db.get('SELECT name, description FROM posts where id=?', [id], function(post) {
-    res.setHeader("Content-Type", "text/json");
-    res.end(JSON.stringify(post));
+  // parse the incoming request containing the form data
+  form.parse(req, function (err, fields, files) {
+    // get the original filename and path
+    var oldFilename = files.media.name;
+    var oldPath = files.media.path;
+
+    // set the destination folder and file type
+    var folder = 'other/';
+    var type = 'other';
+    if(media.isImage(oldFilename)) {
+      folder = 'images/';
+      type = 'image';
+    } else if(media.isVideo(oldFilename)) {
+      folder = 'videos/';
+      type = 'video';
+    }
+
+    // rename and store the file
+    var newFilename = media.createFilename(oldFilename);
+    var newPath = __dirname + '/../../uploads/' + folder + newFilename;
+    fs.rename(oldPath, newPath, function (err) {
+      if (err) throw err;
+    });
+
+    db.run('INSERT INTO posts (subpage_id, title, content, filename, fileType) VALUES (?, ?, ?, ?, ?)', [
+        fields.subpage_id,
+        fields.title,
+        fields.content,
+        newFilename,
+        type
+      ], function(err) {
+        if(err) {
+          console.error(err);
+          res.statusCode = 500;
+          res.end("Server error");
+          return;
+        }
+      }
+    );
+
+    // define the appropriate route to the file
+    if(media.isImage(oldFileName)) {
+      media.addImageRoute(newFilename, newPath, db);
+    } else if(media.isVideo(oldFileName)) {
+      media.addVideoRoute(newFilename, newPath, db);
+    } else {
+      media.addMediaRoute(newFilename, newPath, db);
+    }
   });
 }
 
@@ -94,6 +118,20 @@ function read(req, res, db) {
       res.end("Post not found");
       return;
     }
+    res.setHeader("Content-Type", "text/json");
+    res.end(JSON.stringify(post));
+  });
+}
+
+/** @update
+ * Updates a specific post with the supplied values
+ * @param {http.incomingRequest} req - the request object
+ * @param {http.serverResponse} res - the response object
+ * @param {sqlite3.Database} db - the database object
+ */
+function update(req, res, db) {
+  var id = req.params.id;
+  db.get('SELECT name, description FROM posts where id=?', [id], function(post) {
     res.setHeader("Content-Type", "text/json");
     res.end(JSON.stringify(post));
   });
