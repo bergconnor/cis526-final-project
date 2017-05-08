@@ -21,7 +21,7 @@ var router = new (require('./lib/route')).Router(db);
 
 // cache static directories in the fileserver
 fileserver.loadDir('public');
-fileserver.loadDir('views');
+fileserver.loadDir('uploads');
 
 // define our routes
 var post = require('./src/resource/post');

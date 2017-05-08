@@ -6,10 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "node scripts/migrate.js",
-    "drop": "node scripts/drop-migrations.js",
+    "drop": "node scripts/drop.js",
     "debug": "node --inspect server.js",
-    "build": "browserify client/app.js -o public/reddit.js",
-    "watch": "watchify-server client/app.js -o public/reddit.js",
+    "build": "browserify client/app.js -o public/bundle.js",
     "start": "node server.js"
   },
   "repository": {
@@ -28,7 +27,7 @@
   },
   "homepage": "https://github.com/bergconnor/cis526-final-project#readme",
   "dependencies": {
-    "formidable": "^1.1.1",
+    "octicons": "^5.0.1",
     "sqlite3": "3.1.8"
   },
   "devDependencies": {

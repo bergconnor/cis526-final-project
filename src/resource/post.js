@@ -14,10 +14,12 @@ module.exports = {
   listBySubpage: listBySubpage
 }
 
-var path = require('path');
-var formidable = require('formidable');
 var fs = require('fs');
+var fileserver = require('./../../lib/fileserver');
 var media = require('./../../lib/media');
+var multipart = require('./../../lib/form-multipart');
+var json = require('./../../lib/form-json');
+var urlencoded = require('./../../lib/form-urlencoded');
 
 /** @function list
  * Sends a list of all posts as a JSON array.
@@ -26,15 +28,15 @@ var media = require('./../../lib/media');
  * @param {sqlite3.Database} db - the database object
  */
 function list(req, res, db) {
-    db.all("SELECT * FROM posts", [], function(err, posts) {
-      if(err) {
-        console.error(err);
-        res.statusCode = 500;
-        res.end("Server Error")
-      }
-      res.setHeader("Content-Type", "text/json");
-      res.end(JSON.stringify(posts));
-    });
+  db.all("SELECT * FROM posts", [], function(err, posts) {
+    if(err) {
+      console.error(err);
+      res.statusCode = 500;
+      res.end("Server Error")
+    }
+    res.setHeader("Content-Type", "text/json");
+    res.end(JSON.stringify(posts));
+  });
 }
 
 /** @function create
@@ -44,57 +46,41 @@ function list(req, res, db) {
  * @param {sqlite3.Database} db - the database object
  */
 function create(req, res, db) {
-  // create an incoming form object
-  var form = new formidable.IncomingForm();
-
-  // parse the incoming request containing the form data
-  form.parse(req, function (err, fields, files) {
-    // get the original filename and path
-    var oldFilename = files.media.name;
-    var oldPath = files.media.path;
-
-    // set the destination folder and file type
-    var folder = 'other/';
-    var type = 'other';
-    if(media.isImage(oldFilename)) {
-      folder = 'images/';
-      type = 'image';
-    } else if(media.isVideo(oldFilename)) {
-      folder = 'videos/';
-      type = 'video';
-    }
-
-    // rename and store the file
+  multipart(req, res, function(req, res) {
+    var post = req.body;
+    var oldFilename = post.media.filename;
     var newFilename = media.createFilename(oldFilename);
-    var newPath = __dirname + '/../../uploads/' + folder + newFilename;
-    fs.rename(oldPath, newPath, function (err) {
-      if (err) throw err;
+    var fileType = media.getType(oldFilename);
+
+    db.run('INSERT INTO posts (subpage_id, title, content, filename, fileType, score) VALUES (?, ?, ?, ?, ?, ?)', [
+      post.subpage_id,
+      post.title,
+      post.content,
+      newFilename,
+      fileType,
+      1
+    ], function(err) {
+      if(err) {
+        res.statusCode = 500;
+        res.end("Server error");
+        return;
+      }
+      res.statusCode = 200;
+      res.end("Post created");
     });
 
-    db.run('INSERT INTO posts (subpage_id, title, content, filename, fileType) VALUES (?, ?, ?, ?, ?)', [
-        fields.subpage_id,
-        fields.title,
-        fields.content,
-        newFilename,
-        type
-      ], function(err) {
-        if(err) {
-          console.error(err);
-          res.statusCode = 500;
-          res.end("Server error");
-          return;
-        }
+    // save the file
+    fs.writeFile('./uploads/' + newFilename, post.media.data, function(err) {
+      if(err) {
+        console.error(err);
+        res.statusCode = 500;
+        res.statusMessage = "Server Error";
+        res.end("Server Error");
+        return;
       }
-    );
-
-    // define the appropriate route to the file
-    if(media.isImage(oldFileName)) {
-      media.addImageRoute(newFilename, newPath, db);
-    } else if(media.isVideo(oldFileName)) {
-      media.addVideoRoute(newFilename, newPath, db);
-    } else {
-      media.addMediaRoute(newFilename, newPath, db);
-    }
+      // cache the file
+      fileserver.loadFile(newFilename, './uploads/' + newFilename);
+    });
   });
 }
 
@@ -131,9 +117,21 @@ function read(req, res, db) {
  */
 function update(req, res, db) {
   var id = req.params.id;
-  db.get('SELECT name, description FROM posts where id=?', [id], function(post) {
-    res.setHeader("Content-Type", "text/json");
-    res.end(JSON.stringify(post));
+  json(req, res, function(req, res) {
+    var post = req.body;
+    db.run("UPDATE posts SET title=?, content=?, filename=?, fileType=?, score=? WHERE id=?",
+      [post.title, post.content, post.filename, post.fileType, post.score, id],
+      function(err) {
+        if(err) {
+          console.error(err);
+          res.statusCode = 500;
+          res.end("Could not update post in database");
+          return;
+        }
+        res.statusCode = 200;
+        res.end();
+      }
+    );
   });
 }
 

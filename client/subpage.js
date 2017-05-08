@@ -11,26 +11,59 @@ module.exports = function(reddit) {
    * Displays a list of subpages available
    * to the user in the content element
    */
-  reddit.listSubpages = function() {
-    $.get('/subpages/', (subpages) => {
-      subpages.forEach(function(subpage) {
-        $('<li>').addClass("subpage-nav-item")
-          .append(
-            $('<a>')
-              .attr("href", "/")
-              .text(subpage.name)
-              .on('click', (event) => {
-                event.preventDefault();
-                $("a.active").removeClass("active");
-                $(event.target).addClass("active");
-                $('#subpage-content').empty();
-                $('<h1>').text(subpage.name).appendTo('#subpage-content');
-                $('<p>').text(subpage.description).appendTo('#subpage-content');
-                reddit.showSubpage(subpage.id);
+   reddit.listSubpages = function() {
+     $('#subpage-list').empty();
+     $.get('/subpages/', (subpages) => {
+       subpages.forEach(function(subpage) {
+         $('<li>').addClass("sp-nav-item")
+           .append(
+             $('<a>')
+               .attr("href", "/")
+               .attr("id", subpage.name)
+               .text(subpage.name)
+               .on('click', (e) => {
+                 e.preventDefault();
+                 $("a.active").removeClass("active");
+                 $(e.target).addClass("active");
+                 reddit.showSubpage(subpage.id);
               })
           ).appendTo('#subpage-list');
       });
     });
+  }
+
+  /** @function newSubpage
+   * Displays a form to create a new subpage
+   * in the page's content div
+   */
+  reddit.newSubpage = function() {
+    // grab and clear the content element
+    var content = $('#content').empty();
+
+    // append a title
+    $('<h1>').text('Create New Subpage').appendTo(content);
+
+    // display the edit form
+    var form = $('<form>').appendTo(content);
+    $('<div>').addClass('form-group')
+      .appendTo(form)
+      .append($('<label>').text('Subpage Name:'))
+      .append($('<input name="name" type="text" class="form-control">'))
+    $('<div>').addClass('form-group')
+      .append($('<label>').text('Subpage Description:'))
+      .append($('<textarea name="description" class="form-control">'))
+      .appendTo(form);
+    $('<button>').text("Create Subpage")
+      .addClass('btn btn-primary')
+      .appendTo(form)
+      .on('click', function(e){
+        e.preventDefault();
+        $.post('/subpages/', form.serialize(), function(subpage) {
+          console.log(subpage.id);
+          reddit.listSubpages();
+          reddit.showSubpage(subpage.id);
+        });
+      });
   }
 
   /** @function showSubpage
@@ -39,35 +72,27 @@ module.exports = function(reddit) {
    * @param {integer} id - the id of the subpage
    */
   reddit.showSubpage = function(id) {
-    $.get('/posts/' + subpage.id + '/subpage', (posts) => {
-      posts.forEach(function(post) {
-        if(post.fileType === 'image') {
-          $('<img>').attr('src', post.filename).appendTo('#subpage-content');
-        } else if(post.fileType === 'video') {
-          $('<video>').attr('controls', true).attr('src', post.filename).appendTo('#subpage-content');
-        }
-      });
+    // grab and clear the content element
+    var content = $('#content').empty();
+
+    $.get('/subpages/' + id, function(subpage) {
+      // change the active tabe
+      $('a.active').removeClass("active");
+      $('#' + subpage.name).addClass("active");
+
+      $('<div>').addClass("subpage-header")
+        .append($('<h1>')
+          .text(subpage.name))
+        .append($('<p>')
+          .text(subpage.description))
+        .append($('<button>')
+          .addClass("btn btn-primary")
+          .text('Add Post')
+          .on('click', function(e) {
+            reddit.newPost(id);
+          }))
+        .appendTo('#content');
     });
-  }
-
-  function temp() {
-    $('#subpage-form').load('post-form.html').on('submit', (event) => {
-      event.preventDefault();
-
-      var post = new FormData($('form')[0]);
-      post.append('subpage_id', subpage.id);
-
-      $.post({
-        url: '/posts/',
-        data: post,
-        async: false,
-        cache: false,
-        contentType: false,
-        processData: false,
-        success: function() {
-          window.location.replace('/home.html');
-        }
-      });
-    });
+    reddit.listPostsByID(id);
   }
 }

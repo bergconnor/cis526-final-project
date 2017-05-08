@@ -5,5 +5,6 @@ CREATE TABLE posts (
   content TEXT,
   filename TEXT,
   fileType TEXT,
+  score INTEGER,
   FOREIGN KEY (subpage_id) REFERENCES subpages(id)
 );

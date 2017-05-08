@@ -52,8 +52,22 @@ function create(req, res, db) {
         res.end("Server error");
         return;
       }
-      res.statusCode = 200;
-      res.end("Subpage created");
+      db.get("SELECT LAST_INSERT_ROWID() AS `id`", function(err, id) {
+        if(err) {
+          console.error(err);
+          res.statusCode = 500;
+          res.end("Server error");
+          return;
+        }
+        if(!id) {
+          res.statusCode = 404;
+          res.end("Subpage ID not found");
+          return;
+        }
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "text/json");
+        res.end(JSON.stringify(id));
+      });
     }
   )
   });

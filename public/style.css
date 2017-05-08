@@ -1,0 +1,117 @@
+body, div, p, ul, li {
+  margin: 0;
+  padding: 0;
+}
+
+h1{
+  text-align: center;
+}
+
+img {
+  width: 250px;
+}
+
+video {
+  width: 250px;
+}
+
+.sp-nav-header {
+  background-color: #333;
+  text-transform: lowercase;
+  height: 25px;
+  line-height: 25px;
+}
+
+.sp-nav {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sp-nav-item {
+  float: left;
+}
+
+.sp-nav-item a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 0px 7px 0px 7px;
+  text-decoration: none;
+}
+
+.sp-nav-item a:hover {
+  background-color: black;
+}
+
+a.active {
+  background-color: #B30000;
+}
+
+#menu-list, #subpage-list {
+  float: left;
+}
+
+#menu-list {
+  float: right;
+}
+
+.content {
+  z-index: 1;
+}
+
+.subpage-header {
+  text-align: center;
+}
+
+.post {
+  margin: 20px 20px 0 0;
+  width: 100%;
+  height: 125px;
+}
+
+.vote {
+  float: left;
+  margin: 10px 20px 0 20px;
+  line-height: 50px;
+}
+
+.score {
+  text-align: center;
+  vertical-align: middle;
+  font-size: 20px;
+  margin: -10px 0 -10px 0;
+}
+
+.upvote, .downvote {
+  line-height: 25px;
+}
+
+.upvote a, .downvote a {
+  cursor: pointer;
+}
+
+.upvote svg, .downvote svg {
+  vertical-align: middle;
+}
+
+.thumbnail-link {
+  float: left;
+  font-size: 0;
+  margin: 0 5px 2px 0;
+  overflow: hidden;
+}
+
+.thumbnail-img {
+  width: 200px;
+}
+
+.details {
+  overflow: hidden;
+  margin: 0 0 0 3px;
+}
+
+.details p {
+  margin: 0 0 1px 0;
+  padding: 0;
+  overflow: hidden;
+}

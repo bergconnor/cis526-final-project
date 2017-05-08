@@ -3,61 +3,44 @@
 var reddit = {}
 
 /* Add functionality to the library */
+require('./user')(reddit);
+require('./session')(reddit);
 require('./subpage')(reddit);
+require('./post')(reddit);
 
 reddit.listSubpages();
+reddit.listPosts();
 
 /* Apply menu controls */
-$('#login-logout-link').on('click', (event) => {
-  event.preventDefault();
-  if(isLoggedIn()) {
-    $.get('/sessions/encryptedSession/destroy', function() {
-      window.location.replace("/");
-    }).fail(function() {
-      alert('Failed to logout');
-    });
+$('#home-link').on('click', function(e) {
+  e.preventDefault();
+  reddit.listPosts();
+  $('a.active').removeClass("active");
+  $(e.target).addClass("active");
+});
+
+$('#login-logout-link').on('click', function(e) {
+  e.preventDefault();
+  if(reddit.isLoggedIn()) {
+    reddit.destroySession();
   } else {
-    window.location.replace('/login.html');
+    $('a.active').removeClass("active");
+    $(e.target).addClass("active");
+    reddit.newSession();
   }
 });
 
-$('#subpage-form').on('submit', (event) => {
-  event.preventDefault();
-  var subpage = $("#subpage-form :input").serialize();
-  $.post('/subpages/', subpage, function() {
-    window.location.replace('/');
-  }).fail(function() {
-    alert('This subpage already exists');
-  });
+$('#add-subpage-link').on('click', function(e) {
+  e.preventDefault();
+  $('a.active').removeClass("active");
+  $(e.target).addClass("active");
+  reddit.newSubpage();
 });
 
 $(document).ready(function() {
-  if(isLoggedIn()) {
+  if(reddit.isLoggedIn()) {
     $('#login-logout-link').text('Logout');
   } else {
     $('#login-logout-link').text('Login');
   }
 });
-
-
-/**
- * @function isLoggedIn
- * Determines if a user is logged in based
- * on the session cookie.
- * @returns {boolean} Whether or not a user
- * is logged in.
- */
-function isLoggedIn() {
-  // get the session cookie
-  var value = "; " + document.cookie;
-  var parts = value.split("; encryptedSession=");
-  var cryptedCookie = "";
-  // get the value of the session cookie
-  if(parts.length == 2) {
-    cryptedCookie = parts.pop().split(";").shift();
-  }
-
-  // if the cookie value is not an empty string
-  // a user is logged in
-  return (cryptedCookie.length > 0);
-}
