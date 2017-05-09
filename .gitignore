@@ -4,6 +4,9 @@
 # Config file
 config.json
 
+# Uploads
+uploads/*
+
 # Logs
 logs
 *.log
