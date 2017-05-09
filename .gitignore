@@ -6,6 +6,7 @@ config.json
 
 # Uploads
 uploads/*
+!uploads/.gitkeep
 
 # Logs
 logs
