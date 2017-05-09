@@ -48,9 +48,14 @@ function list(req, res, db) {
 function create(req, res, db) {
   multipart(req, res, function(req, res) {
     var post = req.body;
-    var oldFilename = post.media.filename;
-    var newFilename = media.createFilename(oldFilename);
-    var fileType = media.getType(oldFilename);
+    var file = req.body.media;
+    var newFilename = null;
+    var fileType = null;
+    if(file) {
+      var oldFilename = post.media.filename;
+      var newFilename = media.createFilename(oldFilename);
+      var fileType = media.getType(oldFilename);
+    }
 
     db.run('INSERT INTO posts (subpage_id, title, content, filename, fileType, score) VALUES (?, ?, ?, ?, ?, ?)', [
       post.subpage_id,
@@ -69,18 +74,20 @@ function create(req, res, db) {
       res.end("Post created");
     });
 
+    if(file) {
     // save the file
-    fs.writeFile('./uploads/' + newFilename, post.media.data, function(err) {
-      if(err) {
-        console.error(err);
-        res.statusCode = 500;
-        res.statusMessage = "Server Error";
-        res.end("Server Error");
-        return;
-      }
-      // cache the file
-      fileserver.loadFile(newFilename, './uploads/' + newFilename);
-    });
+      fs.writeFile('./uploads/' + newFilename, post.media.data, function(err) {
+        if(err) {
+          console.error(err);
+          res.statusCode = 500;
+          res.statusMessage = "Server Error";
+          res.end("Server Error");
+          return;
+        }
+        // cache the file
+        fileserver.loadFile(newFilename, './uploads/' + newFilename);
+      });
+    }
   });
 }
 

@@ -24,10 +24,21 @@ $(document).ready(function() {
     $('#login-logout-icon').empty();
     $('#login-logout-icon').append(reddit.octicons['sign-in'].toSVG({"width": 24}));
   }
+
+  var post_link = $('#post-link')
+  if(post_link) {
+    post_link.remove();
+  }
 });
 
 $('#home-link').on('click', function(e) {
   e.preventDefault();
+  
+  var post_link = $('#post-link')
+  if(post_link) {
+    post_link.remove();
+  }
+
   reddit.listPosts();
   $('a.active').removeClass("active");
   $(e.target).addClass("active");
@@ -75,13 +86,38 @@ module.exports = function(reddit) {
 
      $.get('/posts/', function(posts) {
        posts.forEach(function(post) {
-         var img;
-         var type = post.fileType.split('/')[0];
-         if(type === 'video') {
-           addVideoPost(post);
-         } else if(type === 'image') {
-           var img = $('<img>').addClass("thumbnail-img")
-             .attr("src", post.filename);
+         if(post.filename) {
+           var img;
+           var type = post.fileType.split('/')[0];
+           if(type === 'video') {
+             addVideoPost(post);
+           } else if(type === 'image') {
+             var img = $('<img>').addClass("thumbnail-img")
+               .attr("src", post.filename);
+             $('<div>').addClass("post")
+             .append($('<div>').addClass("vote")
+               .append($('<div>').addClass("upvote")
+                 .append($('<a>')
+                   .append(reddit.octicons['arrow-up'].toSVG({"width": 20}))
+                   .on('click', function(e) {
+                     reddit.updatePost(post.id, 1);
+                   })))
+               .append($('<div>').addClass("score")
+                 .text(post.score))
+               .append($('<div>').addClass("downvote")
+                 .append($('<a>')
+                   .append(reddit.octicons['arrow-down'].toSVG({"width": 20}))
+                   .on('click', function(e) {
+                     reddit.updatePost(post.id, -1);
+                   }))))
+               .append($('<a>').addClass("thumbnail-link")
+                 .append(img))
+               .append($('<div>').addClass("details")
+                 .append($('<h5>').text(post.title))
+                 .append($('<h6>').text('comments'))
+               ).appendTo('#content');
+           }
+         } else {
            $('<div>').addClass("post")
            .append($('<div>').addClass("vote")
              .append($('<div>').addClass("upvote")
@@ -98,8 +134,6 @@ module.exports = function(reddit) {
                  .on('click', function(e) {
                    reddit.updatePost(post.id, -1);
                  }))))
-             .append($('<a>').addClass("thumbnail-link")
-               .append(img))
              .append($('<div>').addClass("details")
                .append($('<h5>').text(post.title))
                .append($('<h6>').text('comments'))
@@ -114,15 +148,43 @@ module.exports = function(reddit) {
     * the given subpage ID
     */
     reddit.listPostsByID = function(subpage_id) {
-      $.get('/posts/', {subpage_id: subpage_id}, function(posts) {
+      $.get('/posts/' + subpage_id + '/subpage', {subpage_id: subpage_id}, function(posts) {
+        // grab and clear the content element
+        var content = $('#content');
+
         posts.forEach(function(post) {
-          var img;
-          var type = post.fileType.split('/')[0];
-          if(type === 'video') {
-            addVideoPost(post);
-          } else if(type === 'image') {
-            var img = $('<img>').addClass("thumbnail-img")
-              .attr("src", post.filename);
+          if(post.filename) {
+            var img;
+            var type = post.fileType.split('/')[0];
+            if(type === 'video') {
+              addVideoPost(post);
+            } else if(type === 'image') {
+              var img = $('<img>').addClass("thumbnail-img")
+                .attr("src", post.filename);
+              $('<div>').addClass("post")
+              .append($('<div>').addClass("vote")
+                .append($('<div>').addClass("upvote")
+                  .append($('<a>')
+                    .append(reddit.octicons['arrow-up'].toSVG({"width": 20}))
+                    .on('click', function(e) {
+                      reddit.updatePost(post.id, 1);
+                    })))
+                .append($('<div>').addClass("score")
+                  .text(post.score))
+                .append($('<div>').addClass("downvote")
+                  .append($('<a>')
+                    .append(reddit.octicons['arrow-down'].toSVG({"width": 20}))
+                    .on('click', function(e) {
+                      reddit.updatePost(post.id, -1);
+                    }))))
+                .append($('<a>').addClass("thumbnail-link")
+                  .append(img))
+                .append($('<div>').addClass("details")
+                  .append($('<h5>').text(post.title))
+                  .append($('<h6>').text('comments'))
+                ).appendTo('#content');
+            }
+          } else {
             $('<div>').addClass("post")
             .append($('<div>').addClass("vote")
               .append($('<div>').addClass("upvote")
@@ -139,11 +201,9 @@ module.exports = function(reddit) {
                   .on('click', function(e) {
                     reddit.updatePost(post.id, -1);
                   }))))
-              .append($('<a>').addClass("thumbnail-link")
-                .append(img))
               .append($('<div>').addClass("details")
-                .append($('<p>').text(post.title))
-                .append($('<p>').text('comments'))
+                .append($('<h5>').text(post.title))
+                .append($('<h6>').text('comments'))
               ).appendTo('#content');
           }
         });
@@ -155,41 +215,88 @@ module.exports = function(reddit) {
    * in the page's content div
    */
   reddit.newPost = function(subpage_id) {
-    // grab and clear the content element
-    var content = $('#content').empty();
+    // set the modal title
+    var title = "Create Post";
 
-    // append a title
-    $('<h1>').text('Create New Post').appendTo(content);
+    // create the modal form
+    var form = $('<form>')
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="title" type="text" class="form-control">')
+          .attr('placeholder', "title")))
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="content" type="text" class="form-control">')
+          .attr('placeholder', "content")))
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="media" type="file" class="form-control">')
+          .attr('placeholder', "media")))
+      .append($('<div>').addClass('form-group')
+        .append($('<div>').addClass("progress-bar")
+          .attr('role', 'progressbar')
+          .height(20)
+          .width(0)));
 
-    // display the edit form
-    var form = $('<form>').appendTo(content);
-    $('<div>').addClass('form-group')
-      .append($('<label>').text('Title'))
-      .append($('<input name="title" type="text" class="form-control">'))
-      .appendTo(form);
-    $('<div>').addClass('form-group')
-      .append($('<label>').text('Content'))
-      .append($('<input name="content" type="text" class="form-control">'))
-      .appendTo(form);
-    $('<div>').addClass('form-group')
-      .append($('<label>').text('Media'))
-      .append($('<input name="media" type="file" class="form-control">'))
-      .appendTo(form);
-    $('<div>').addClass('progress')
-      .append($('<div>').addClass('progress-bar').attr('role', 'progressbar'))
-      .appendTo(form);
-    $('<button>').text("Create Post")
-      .addClass('btn btn-primary')
-      .appendTo(form)
-      .on('click', function(e) {
-        event.preventDefault();
-        var formData = new FormData(form.get(0));
-        var files = form.find('input[type=file]')[0].files;
-
-        if(files.length > 0) {
-          var file = files[0];
-          formData.append('media', file, file.name);
+    // creat the modal footer
+    var modalFooter = $('<div>').addClass("modal-footer")
+      .append($('<button>').addClass("btn btn-secondary")
+        .text("Close")
+        .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
+        .attr('aria-label', "Cancel"))
+      .append($('<button>').addClass("btn btn-primary")
+        .text("Create")
+        .attr('type', 'button')
+        .on('click', function(e) {
+          event.preventDefault();
+          var formData = new FormData(form.get(0));
           formData.append('subpage_id', subpage_id);
+
+          if(formData.get('title').length > 20) {
+            modal.modal('hide');
+            $('<div>').addClass("alert alert-danger alert-dismissable fade show text-center")
+              .attr('role', 'alert')
+              .attr('id', 'alert-message')
+              .append($('<button>').addClass("close")
+                .attr('type', 'button')
+                .attr('data-dismiss', 'alert')
+                .attr('aria-label', 'Close')
+                .append($('<span>').html("&times;")
+                  .attr('aria-hidden', 'true')))
+              .append($('<strong>').text("Invalid title! "))
+              .append("Max title length is 20 characters.")
+              .prependTo('#content');
+              window.setTimeout(function() {
+                $("#alert-message").fadeTo(500, 0).slideUp(500, function() {
+                  $(this).remove();
+                });
+              }, 4000);
+          }
+
+          var files = form.find('input[type=file]')[0].files;
+          if(files.length > 0) {
+            var file = files[0];
+            formData.append('media', file, file.name);
+            var fileSize = (file.size/(1024*1024));
+            if(fileSize > 100.0) {
+              modal.modal('hide');
+              $('<div>').addClass("alert alert-danger alert-dismissable fade show text-center")
+                .attr('role', 'alert')
+                .attr('id', 'alert-message')
+                .append($('<button>').addClass("close")
+                  .attr('type', 'button')
+                  .attr('data-dismiss', 'alert')
+                  .attr('aria-label', 'Close')
+                  .append($('<span>').html("&times;")
+                    .attr('aria-hidden', 'true')))
+                .append($('<strong>').text("File size too large! "))
+                .append("Files must be less than 100MB.")
+                .prependTo('#content');
+                window.setTimeout(function() {
+                  $("#alert-message").fadeTo(500, 0).slideUp(500, function() {
+                    $(this).remove();
+                  });
+                }, 4000);
+            }
+          }
 
           $.ajax({
             url: '/posts/',
@@ -218,7 +325,10 @@ module.exports = function(reddit) {
                   // once the upload reaches 100%, set the progress bar text to done
                   if (percentComplete === 100) {
                     $('.progress-bar').html('Done');
-                    reddit.showSubpage(subpage_id);
+                    modal.modal('hide');
+                    setTimeout(function() {
+                      reddit.showSubpage(subpage_id);
+                    }, 1500);
                   }
                 }
               }, false);
@@ -226,8 +336,39 @@ module.exports = function(reddit) {
               return xhr;
             }
           });
-        }
-      });
+      }));
+
+    // create the modal body and append the form
+    var modalBody = $('<div>').addClass("modal-body")
+      .append(form);
+
+    // create the modal header
+    var modalHeader = $('<div>').addClass("modal-header")
+      .append($('<h5>').text(title))
+      .append($('<button>').addClass("close")
+        .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
+        .attr('aria-label', "Close")
+        .append($('<span>').html("&times;")
+          .attr('aria-hidden', 'true')));
+
+    // create the modal content and append the modal header, footer and body
+    var modalContent = $('<div>').addClass("modal-content")
+      .append(modalHeader)
+      .append(modalBody)
+      .append(modalFooter);
+
+    // create the modal dialog and append the modal content
+    var modalDialog = $('<div>').addClass("modal-dialog")
+      .attr('role', 'document')
+      .append(modalContent);
+
+    // create the modal and append the modal dialog
+    var modal = $('<div>').addClass("modal fade")
+      .append(modalDialog);
+
+    // show the modal
+    modal.modal('show');
   }
 
   /** @function updatePost
@@ -263,21 +404,23 @@ reddit.updatePost = function(id, val) {
         .append($('<div>').addClass("vote")
           .append($('<div>').addClass("upvote")
             .append($('<a>')
-              .append(octicons['arrow-up'].toSVG())
+              .append(reddit.octicons['arrow-up'].toSVG({"width": 20}))
               .on('click', function(e) {
                 reddit.updatePost(post.id, 1);
               })))
+          .append($('<div>').addClass("score")
+            .text(post.score))
           .append($('<div>').addClass("downvote")
             .append($('<a>')
-              .append(octicons['arrow-down'].toSVG())
+              .append(reddit.octicons['arrow-down'].toSVG({"width": 20}))
               .on('click', function(e) {
                 reddit.updatePost(post.id, -1);
               }))))
         .append($('<a>').addClass("thumbnail-link")
           .append(img))
         .append($('<div>').addClass("details")
-          .append($('<p>').text(post.title))
-          .append($('<p>').text('comments')))
+          .append($('<h5>').text(post.title))
+          .append($('<h6>').text('comments')))
         .appendTo('#content');
    });
    video.addEventListener("error", function () {
@@ -490,7 +633,7 @@ module.exports = function(reddit) {
         .text("Close")
         .attr('type', 'button')
         .attr('data-dismiss', 'modal')
-        .attr('aria-label', "Close"))
+        .attr('aria-label', "Cancel"))
       .append($('<button>').addClass("btn btn-primary")
         .text("Create")
         .attr('type', 'button')
@@ -546,6 +689,20 @@ module.exports = function(reddit) {
     // grab and clear the content element
     var content = $('#content').empty();
 
+    if($('#post-link', '#side-menu').length != 1) {
+      // add a menu item to add a post
+      $('#side-menu')
+        .append($('<div>').addClass("menu-item")
+          .append($('<span>').addClass("menu-item-icon")
+            .append(reddit.octicons.pencil.toSVG({"width": 24})))
+          .append($('<span>').addClass("hover-text")
+            .text("Add Post"))
+          .attr('id', 'post-link')
+          .on('click', function(e) {
+            reddit.newPost(id);
+          }));
+    }
+
     $.get('/subpages/' + id, function(subpage) {
       // change the active tabe
       $('a.active').removeClass("active");
@@ -554,16 +711,11 @@ module.exports = function(reddit) {
       $('<div>').addClass("subpage-header")
         .append($('<h1>')
           .text(subpage.name))
-        .append($('<p>')
+        .append($('<h4>')
           .text(subpage.description))
-        .append($('<button>')
-          .addClass("btn btn-primary")
-          .text('Add Post')
-          .on('click', function(e) {
-            reddit.newPost(id);
-          }))
         .appendTo('#content');
     });
+    reddit.listPostsByID(id);
   }
 }
 

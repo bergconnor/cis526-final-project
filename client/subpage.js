@@ -55,7 +55,7 @@ module.exports = function(reddit) {
         .text("Close")
         .attr('type', 'button')
         .attr('data-dismiss', 'modal')
-        .attr('aria-label', "Close"))
+        .attr('aria-label', "Cancel"))
       .append($('<button>').addClass("btn btn-primary")
         .text("Create")
         .attr('type', 'button')
@@ -111,6 +111,20 @@ module.exports = function(reddit) {
     // grab and clear the content element
     var content = $('#content').empty();
 
+    if($('#post-link', '#side-menu').length != 1) {
+      // add a menu item to add a post
+      $('#side-menu')
+        .append($('<div>').addClass("menu-item")
+          .append($('<span>').addClass("menu-item-icon")
+            .append(reddit.octicons.pencil.toSVG({"width": 24})))
+          .append($('<span>').addClass("hover-text")
+            .text("Add Post"))
+          .attr('id', 'post-link')
+          .on('click', function(e) {
+            reddit.newPost(id);
+          }));
+    }
+
     $.get('/subpages/' + id, function(subpage) {
       // change the active tabe
       $('a.active').removeClass("active");
@@ -119,15 +133,10 @@ module.exports = function(reddit) {
       $('<div>').addClass("subpage-header")
         .append($('<h1>')
           .text(subpage.name))
-        .append($('<p>')
+        .append($('<h4>')
           .text(subpage.description))
-        .append($('<button>')
-          .addClass("btn btn-primary")
-          .text('Add Post')
-          .on('click', function(e) {
-            reddit.newPost(id);
-          }))
         .appendTo('#content');
     });
+    reddit.listPostsByID(id);
   }
 }

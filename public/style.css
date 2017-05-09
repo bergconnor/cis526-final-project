@@ -2,7 +2,9 @@ body {
   background-color: #E4DBBF;
 }
 
-h1 {
+h1, h2, h3, h4, h5, h6 {
+  left: 0;
+  right: 0;
   text-align: center;
 }
 
@@ -72,7 +74,7 @@ a.active {
   width: 50px;
   position: fixed;
   z-index: 1;
-  top: 100px;
+  top: 200px;
   right: 0;
   background-color: #282827;
   overflow-x: hidden;
@@ -111,13 +113,10 @@ a.active {
   display: block;
 }
 
-/*.side-menu .close-menu {
-  position: absolute;
-  top: 0;
-  right: 25px;
-  font-size: 36px;
-  margin-left: 50px;
-}*/
+.hover-text {
+  font-size: 10px;
+  text-align: center;
+}
 
 .content {
   color: #383127;

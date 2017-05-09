@@ -23,10 +23,21 @@ $(document).ready(function() {
     $('#login-logout-icon').empty();
     $('#login-logout-icon').append(reddit.octicons['sign-in'].toSVG({"width": 24}));
   }
+
+  var post_link = $('#post-link')
+  if(post_link) {
+    post_link.remove();
+  }
 });
 
 $('#home-link').on('click', function(e) {
   e.preventDefault();
+  
+  var post_link = $('#post-link')
+  if(post_link) {
+    post_link.remove();
+  }
+
   reddit.listPosts();
   $('a.active').removeClass("active");
   $(e.target).addClass("active");
