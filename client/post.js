@@ -7,7 +7,7 @@
   */
 module.exports = function(reddit) {
 
-  var octicons = require('octicons');
+  reddit.octicons = require('octicons');
 
   /** @function listPosts
    * Displays a list of posts sorted
@@ -16,6 +16,7 @@ module.exports = function(reddit) {
    reddit.listPosts = function() {
      // grab and clear the content element
      var content = $('#content').empty();
+
      $.get('/posts/', function(posts) {
        posts.forEach(function(post) {
          var img;
@@ -29,7 +30,7 @@ module.exports = function(reddit) {
            .append($('<div>').addClass("vote")
              .append($('<div>').addClass("upvote")
                .append($('<a>')
-                 .append(octicons['arrow-up'].toSVG({"width": 20}))
+                 .append(reddit.octicons['arrow-up'].toSVG({"width": 20}))
                  .on('click', function(e) {
                    reddit.updatePost(post.id, 1);
                  })))
@@ -37,15 +38,15 @@ module.exports = function(reddit) {
                .text(post.score))
              .append($('<div>').addClass("downvote")
                .append($('<a>')
-                 .append(octicons['arrow-down'].toSVG({"width": 20}))
+                 .append(reddit.octicons['arrow-down'].toSVG({"width": 20}))
                  .on('click', function(e) {
                    reddit.updatePost(post.id, -1);
                  }))))
              .append($('<a>').addClass("thumbnail-link")
                .append(img))
              .append($('<div>').addClass("details")
-               .append($('<p>').text(post.title))
-               .append($('<p>').text('comments'))
+               .append($('<h5>').text(post.title))
+               .append($('<h6>').text('comments'))
              ).appendTo('#content');
          }
        });
@@ -70,7 +71,7 @@ module.exports = function(reddit) {
             .append($('<div>').addClass("vote")
               .append($('<div>').addClass("upvote")
                 .append($('<a>')
-                  .append(octicons['arrow-up'].toSVG({"width": 20}))
+                  .append(reddit.octicons['arrow-up'].toSVG({"width": 20}))
                   .on('click', function(e) {
                     reddit.updatePost(post.id, 1);
                   })))
@@ -78,7 +79,7 @@ module.exports = function(reddit) {
                 .text(post.score))
               .append($('<div>').addClass("downvote")
                 .append($('<a>')
-                  .append(octicons['arrow-down'].toSVG({"width": 20}))
+                  .append(reddit.octicons['arrow-down'].toSVG({"width": 20}))
                   .on('click', function(e) {
                     reddit.updatePost(post.id, -1);
                   }))))

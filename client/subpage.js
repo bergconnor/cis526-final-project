@@ -37,33 +37,69 @@ module.exports = function(reddit) {
    * in the page's content div
    */
   reddit.newSubpage = function() {
-    // grab and clear the content element
-    var content = $('#content').empty();
+    // set the modal title
+    var title = "Create Subpage";
 
-    // append a title
-    $('<h1>').text('Create New Subpage').appendTo(content);
+    // create the modal form
+    var form = $('<form>')
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="name" type="text" class="form-control">')
+          .attr('placeholder', "name")))
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="description" type="text" class="form-control">')
+          .attr('placeholder', "description")));
 
-    // display the edit form
-    var form = $('<form>').appendTo(content);
-    $('<div>').addClass('form-group')
-      .appendTo(form)
-      .append($('<label>').text('Subpage Name:'))
-      .append($('<input name="name" type="text" class="form-control">'))
-    $('<div>').addClass('form-group')
-      .append($('<label>').text('Subpage Description:'))
-      .append($('<textarea name="description" class="form-control">'))
-      .appendTo(form);
-    $('<button>').text("Create Subpage")
-      .addClass('btn btn-primary')
-      .appendTo(form)
-      .on('click', function(e){
-        e.preventDefault();
-        $.post('/subpages/', form.serialize(), function(subpage) {
-          console.log(subpage.id);
-          reddit.listSubpages();
-          reddit.showSubpage(subpage.id);
-        });
-      });
+    // creat the modal footer
+    var modalFooter = $('<div>').addClass("modal-footer")
+      .append($('<button>').addClass("btn btn-secondary")
+        .text("Close")
+        .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
+        .attr('aria-label', "Close"))
+      .append($('<button>').addClass("btn btn-primary")
+        .text("Create")
+        .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
+        .on('click', function(e) {
+          e.preventDefault();
+          $.post('/subpages/', form.serialize(), function(subpage) {
+            console.log(subpage.id);
+            reddit.listSubpages();
+            reddit.showSubpage(subpage.id);
+          });
+        }));
+
+    // create the modal body and append the form
+    var modalBody = $('<div>').addClass("modal-body")
+      .append(form);
+
+    // create the modal header
+    var modalHeader = $('<div>').addClass("modal-header")
+      .append($('<h5>').text(title))
+      .append($('<button>').addClass("close")
+        .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
+        .attr('aria-label', "Close")
+        .append($('<span>').html("&times;")
+          .attr('aria-hidden', 'true')));
+
+    // create the modal content and append the modal header, footer and body
+    var modalContent = $('<div>').addClass("modal-content")
+      .append(modalHeader)
+      .append(modalBody)
+      .append(modalFooter);
+
+    // create the modal dialog and append the modal content
+    var modalDialog = $('<div>').addClass("modal-dialog")
+      .attr('role', 'document')
+      .append(modalContent);
+
+    // create the modal and append the modal dialog
+    var modal = $('<div>').addClass("modal fade")
+      .append(modalDialog);
+
+    // show the modal
+    modal.modal('show');
   }
 
   /** @function showSubpage
@@ -93,6 +129,5 @@ module.exports = function(reddit) {
           }))
         .appendTo('#content');
     });
-    reddit.listPostsByID(id);
   }
 }

@@ -13,6 +13,19 @@ reddit.listSubpages();
 reddit.listPosts();
 
 /* Apply menu controls */
+$(document).ready(function() {
+  $('#home-icon').append(reddit.octicons.home.toSVG({"width": 24}));
+  $('#add-subpage-icon').append(reddit.octicons.plus.toSVG({"width": 24}));
+
+  if(reddit.isLoggedIn()) {
+    $('#login-logout-icon').empty();
+    $('#login-logout-icon').append(reddit.octicons['sign-out'].toSVG({"width": 24}));
+  } else {
+    $('#login-logout-icon').empty();
+    $('#login-logout-icon').append(reddit.octicons['sign-in'].toSVG({"width": 24}));
+  }
+});
+
 $('#home-link').on('click', function(e) {
   e.preventDefault();
   reddit.listPosts();
@@ -23,10 +36,12 @@ $('#home-link').on('click', function(e) {
 $('#login-logout-link').on('click', function(e) {
   e.preventDefault();
   if(reddit.isLoggedIn()) {
+    // $('#login-logout-icon').empty();
+    // $('#login-logout-icon').append(reddit.octicons['sign-in'].toSVG({"width": 24}));
     reddit.destroySession();
   } else {
-    $('a.active').removeClass("active");
-    $(e.target).addClass("active");
+    // $('#login-logout-icon').empty();
+    // $('#login-logout-icon').append(reddit.octicons['sign-out'].toSVG({"width": 24}));
     reddit.newSession();
   }
 });
@@ -36,14 +51,6 @@ $('#add-subpage-link').on('click', function(e) {
   $('a.active').removeClass("active");
   $(e.target).addClass("active");
   reddit.newSubpage();
-});
-
-$(document).ready(function() {
-  if(reddit.isLoggedIn()) {
-    $('#login-logout-link').text('Logout');
-  } else {
-    $('#login-logout-link').text('Login');
-  }
 });
 
 },{"./post":2,"./session":3,"./subpage":4,"./user":5}],2:[function(require,module,exports){
@@ -56,7 +63,7 @@ $(document).ready(function() {
   */
 module.exports = function(reddit) {
 
-  var octicons = require('octicons');
+  reddit.octicons = require('octicons');
 
   /** @function listPosts
    * Displays a list of posts sorted
@@ -65,6 +72,7 @@ module.exports = function(reddit) {
    reddit.listPosts = function() {
      // grab and clear the content element
      var content = $('#content').empty();
+
      $.get('/posts/', function(posts) {
        posts.forEach(function(post) {
          var img;
@@ -78,7 +86,7 @@ module.exports = function(reddit) {
            .append($('<div>').addClass("vote")
              .append($('<div>').addClass("upvote")
                .append($('<a>')
-                 .append(octicons['arrow-up'].toSVG({"width": 20}))
+                 .append(reddit.octicons['arrow-up'].toSVG({"width": 20}))
                  .on('click', function(e) {
                    reddit.updatePost(post.id, 1);
                  })))
@@ -86,15 +94,15 @@ module.exports = function(reddit) {
                .text(post.score))
              .append($('<div>').addClass("downvote")
                .append($('<a>')
-                 .append(octicons['arrow-down'].toSVG({"width": 20}))
+                 .append(reddit.octicons['arrow-down'].toSVG({"width": 20}))
                  .on('click', function(e) {
                    reddit.updatePost(post.id, -1);
                  }))))
              .append($('<a>').addClass("thumbnail-link")
                .append(img))
              .append($('<div>').addClass("details")
-               .append($('<p>').text(post.title))
-               .append($('<p>').text('comments'))
+               .append($('<h5>').text(post.title))
+               .append($('<h6>').text('comments'))
              ).appendTo('#content');
          }
        });
@@ -119,7 +127,7 @@ module.exports = function(reddit) {
             .append($('<div>').addClass("vote")
               .append($('<div>').addClass("upvote")
                 .append($('<a>')
-                  .append(octicons['arrow-up'].toSVG({"width": 20}))
+                  .append(reddit.octicons['arrow-up'].toSVG({"width": 20}))
                   .on('click', function(e) {
                     reddit.updatePost(post.id, 1);
                   })))
@@ -127,7 +135,7 @@ module.exports = function(reddit) {
                 .text(post.score))
               .append($('<div>').addClass("downvote")
                 .append($('<a>')
-                  .append(octicons['arrow-down'].toSVG({"width": 20}))
+                  .append(reddit.octicons['arrow-down'].toSVG({"width": 20}))
                   .on('click', function(e) {
                     reddit.updatePost(post.id, -1);
                   }))))
@@ -309,41 +317,88 @@ module.exports = function(reddit) {
    * Displays a form to create a new session
    * based on the user's login information
    */
-   reddit.newSession = function() {
-     // grab and clear the content element
-     var content = $('#content').empty();
+  reddit.newSession = function() {
+    // set the modal title
+    var title = "Login";
 
-     // append a title
-     $('<h1>').text('Login').appendTo(content);
+    // create the modal form
+    var form = $('<form>')
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="username" type="text" class="form-control">')
+          .attr('placeholder', "username")))
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="password" type="password" class="form-control">')
+          .attr('placeholder', "password")));
 
-     var form = $('<form>').appendTo(content);
-     $('<div>').addClass('form-group')
-       .append($('<label>').text('Username'))
-       .append($('<input name="username" type="text" class="form-control">'))
-       .appendTo(form);
-     $('<div>').addClass('form-group')
-       .append($('<label>').text('Password'))
-       .append($('<input name="password" type="password" class="form-control">'))
-       .appendTo(form);
-     $('<button>').text("Login")
-       .addClass('btn btn-primary')
-       .appendTo(form)
-       .on('click', function(e) {
-         e.preventDefault();
-         $.post('/sessions/', form.serialize(), function() {
-           window.location.replace("/");
-         }).fail(function() {
-           alert('Invalid username/password');
-         });
-       });
-     $('<button>').text("Sign Up")
-       .addClass('btn btn-primary')
-       .appendTo(form)
-       .on('click', function(e) {
-         e.preventDefault();
-         reddit.newUser();
-       });
-   }
+    // creat the modal footer
+    var modalFooter = $('<div>').addClass("modal-footer")
+      .append($('<button>').addClass("btn btn-primary")
+        .text("Login")
+        .on('click', function(e) {
+          e.preventDefault();
+          $.post('/sessions/', form.serialize(), function() {
+            window.location.replace("/");
+          }).fail(function() {
+            modal.modal('hide');
+            $('<div>').addClass("alert alert-danger alert-dismissable fade show text-center")
+              .attr('role', 'alert')
+              .attr('id', 'alert-message')
+              .append($('<button>').addClass("close")
+                .attr('type', 'button')
+                .attr('data-dismiss', 'alert')
+                .attr('aria-label', 'Close')
+                .append($('<span>').html("&times;")
+                  .attr('aria-hidden', 'true')))
+              .append($('<strong>').text("Invalid username/password."))
+              .prependTo('#content');
+              window.setTimeout(function() {
+                $("#alert-message").fadeTo(500, 0).slideUp(500, function() {
+                  $(this).remove();
+                });
+              }, 4000);
+          });
+        }))
+      .append($('<button>').addClass("btn btn-primary")
+        .text("Sign Up")
+        .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
+        .on('click', function(e) {
+          e.preventDefault();
+          reddit.newUser();
+        }));
+
+    // create the modal body and append the form
+    var modalBody = $('<div>').addClass("modal-body")
+      .append(form);
+
+    // create the modal header
+    var modalHeader = $('<div>').addClass("modal-header")
+      .append($('<h5>').text(title))
+      .append($('<button>').addClass("close")
+        .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
+        .attr('aria-label', "Close")
+        .append($('<span>').html("&times;")
+          .attr('aria-hidden', 'true')));
+
+    // create the modal content and append the modal header, footer and body
+    var modalContent = $('<div>').addClass("modal-content")
+      .append(modalHeader)
+      .append(modalBody)
+      .append(modalFooter);
+
+    // create the modal dialog and append the modal content
+    var modalDialog = $('<div>').addClass("modal-dialog")
+      .attr('role', 'document')
+      .append(modalContent);
+
+    // create the modal and append the modal dialog
+    var modal = $('<div>').addClass("modal fade")
+      .append(modalDialog);
+
+    // show the modal
+    modal.modal('show');
+  }
 
    /** @function destroySession
     * Destroys the current session
@@ -417,33 +472,69 @@ module.exports = function(reddit) {
    * in the page's content div
    */
   reddit.newSubpage = function() {
-    // grab and clear the content element
-    var content = $('#content').empty();
+    // set the modal title
+    var title = "Create Subpage";
 
-    // append a title
-    $('<h1>').text('Create New Subpage').appendTo(content);
+    // create the modal form
+    var form = $('<form>')
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="name" type="text" class="form-control">')
+          .attr('placeholder', "name")))
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="description" type="text" class="form-control">')
+          .attr('placeholder', "description")));
 
-    // display the edit form
-    var form = $('<form>').appendTo(content);
-    $('<div>').addClass('form-group')
-      .appendTo(form)
-      .append($('<label>').text('Subpage Name:'))
-      .append($('<input name="name" type="text" class="form-control">'))
-    $('<div>').addClass('form-group')
-      .append($('<label>').text('Subpage Description:'))
-      .append($('<textarea name="description" class="form-control">'))
-      .appendTo(form);
-    $('<button>').text("Create Subpage")
-      .addClass('btn btn-primary')
-      .appendTo(form)
-      .on('click', function(e){
-        e.preventDefault();
-        $.post('/subpages/', form.serialize(), function(subpage) {
-          console.log(subpage.id);
-          reddit.listSubpages();
-          reddit.showSubpage(subpage.id);
-        });
-      });
+    // creat the modal footer
+    var modalFooter = $('<div>').addClass("modal-footer")
+      .append($('<button>').addClass("btn btn-secondary")
+        .text("Close")
+        .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
+        .attr('aria-label', "Close"))
+      .append($('<button>').addClass("btn btn-primary")
+        .text("Create")
+        .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
+        .on('click', function(e) {
+          e.preventDefault();
+          $.post('/subpages/', form.serialize(), function(subpage) {
+            console.log(subpage.id);
+            reddit.listSubpages();
+            reddit.showSubpage(subpage.id);
+          });
+        }));
+
+    // create the modal body and append the form
+    var modalBody = $('<div>').addClass("modal-body")
+      .append(form);
+
+    // create the modal header
+    var modalHeader = $('<div>').addClass("modal-header")
+      .append($('<h5>').text(title))
+      .append($('<button>').addClass("close")
+        .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
+        .attr('aria-label', "Close")
+        .append($('<span>').html("&times;")
+          .attr('aria-hidden', 'true')));
+
+    // create the modal content and append the modal header, footer and body
+    var modalContent = $('<div>').addClass("modal-content")
+      .append(modalHeader)
+      .append(modalBody)
+      .append(modalFooter);
+
+    // create the modal dialog and append the modal content
+    var modalDialog = $('<div>').addClass("modal-dialog")
+      .attr('role', 'document')
+      .append(modalContent);
+
+    // create the modal and append the modal dialog
+    var modal = $('<div>').addClass("modal fade")
+      .append(modalDialog);
+
+    // show the modal
+    modal.modal('show');
   }
 
   /** @function showSubpage
@@ -473,7 +564,6 @@ module.exports = function(reddit) {
           }))
         .appendTo('#content');
     });
-    reddit.listPostsByID(id);
   }
 }
 
@@ -490,42 +580,72 @@ module.exports = function(reddit) {
   /** @function newUser
    * Displays a form to create a new user
    */
-   reddit.newUser = function() {
-     // grab and clear the content element
-     var content = $('#content').empty();
+  reddit.newUser = function() {
+    // set the modal title
+    var title = "Sign Up";
 
-     // append a title
-     $('<h1>').text('Sign Up').appendTo(content);
+    // create the modal form
+    var form = $('<form>')
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="email" type="email" class="form-control">')
+          .attr('placeholder', "email")))
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="username" type="text" class="form-control">')
+          .attr('placeholder', "username")))
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="password" type="password" class="form-control">')
+          .attr('placeholder', "password")))
+      .append($('<div>').addClass('form-group')
+        .append($('<input name="verify-password" type="password" class="form-control">')
+          .attr('placeholder', "verify password")));
 
-     var form = $('<form>').appendTo(content);
-     $('<div>').addClass('form-group')
-       .append($('<label>').text('Email'))
-       .append($('<input name="email" type="email" class="form-control">'))
-       .appendTo(form);
-     $('<div>').addClass('form-group')
-       .append($('<label>').text('Username'))
-       .append($('<input name="username" type="text" class="form-control">'))
-       .appendTo(form);
-     $('<div>').addClass('form-group')
-       .append($('<label>').text('Password'))
-       .append($('<input name="password" type="password" class="form-control">'))
-       .appendTo(form);
-     $('<div>').addClass('form-group')
-       .append($('<label>').text('Verify Password'))
-       .append($('<input name="verify-password" type="password" class="form-control">'))
-       .appendTo(form);
-     $('<button>').text("Sign Up")
-       .addClass('btn btn-primary')
-       .appendTo(form)
-       .on('click', function(e) {
-         e.preventDefault();
-         $.post('/users/', form.serialize(), function() {
-           window.location.replace("/");
-         }).fail(function() {
-           alert('Something went wrong');
-         });
-       });
-   }
+    // creat the modal footer
+    var modalFooter = $('<div>').addClass("modal-footer")
+      .append($('<button>').addClass("btn btn-primary")
+        .text("Sign Up")
+        .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
+        .on('click', function(e) {
+          e.preventDefault();
+          $.post('/users/', form.serialize(), function() {
+            reddit.newSession();
+          }).fail(function() {
+            alert('Something went wrong');
+          });
+        }));
+
+    // create the modal body and append the form
+    var modalBody = $('<div>').addClass("modal-body")
+      .append(form);
+
+    // create the modal header
+    var modalHeader = $('<div>').addClass("modal-header")
+      .append($('<h5>').text(title))
+      .append($('<button>').addClass("close")
+        .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
+        .attr('aria-label', "Close")
+        .append($('<span>').html("&times;")
+          .attr('aria-hidden', 'true')));
+
+    // create the modal content and append the modal header, footer and body
+    var modalContent = $('<div>').addClass("modal-content")
+      .append(modalHeader)
+      .append(modalBody)
+      .append(modalFooter);
+
+    // create the modal dialog and append the modal content
+    var modalDialog = $('<div>').addClass("modal-dialog")
+      .attr('role', 'document')
+      .append(modalContent);
+
+    // create the modal and append the modal dialog
+    var modal = $('<div>').addClass("modal fade")
+      .append(modalDialog);
+
+    // show the modal
+    modal.modal('show');
+  }
 }
 
 },{}],6:[function(require,module,exports){
