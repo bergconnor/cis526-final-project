@@ -10,8 +10,10 @@ var db = new sqlite3.Database('reddit.sqlite3', function(err) {
 
 db.run("DROP TABLE IF EXISTS posts");
 db.run("DROP TABLE IF EXISTS subpages");
+db.run("DROP TABLE IF EXISTS comments");
 db.run("DELETE FROM migrations WHERE filename='2-create-posts.sql'");
 db.run("DELETE FROM migrations WHERE filename='1-create-subpages.sql'");
+db.run("DELETE FROM migrations WHERE filename='6-create-comments.sql'");
 
 removeDirForce("./uploads/");
 
