@@ -78,6 +78,7 @@ a.active {
   right: 0;
   background-color: #282827;
   overflow-x: hidden;
+  cursor: pointer;
 }
 
 .side-menu a {
@@ -86,7 +87,8 @@ a.active {
   font-size: 25px;
   color: #818181;
   display: block;
-  transition: 0.3s
+  transition: 0.3s;
+
 }
 
 .menu-item {
