@@ -1,5 +1,6 @@
 # Database
 *.sqlite3
+reddit.sqlite3
 
 # Config file
 config.json
