@@ -614,7 +614,7 @@ reddit.updatePost = function(id, val) {
   $.get('/posts/' + id, (post) => {
     post.score += val;
     $.post('/posts/' + id, JSON.stringify(post), function() {
-      reddit.listPosts();
+      reddit.listPostsByID(post.subpage_id);
     });
   });
 }
