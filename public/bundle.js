@@ -11,6 +11,7 @@ require('./post')(reddit);
 require('./comment')(reddit);
 
 reddit.listSubpages();
+reddit.listPosts();
 
 /* Apply menu controls */
 $(document).ready(function() {
@@ -41,7 +42,7 @@ $(document).ready(function() {
   var content2 = $('#content2').empty();
   $('<div>').addClass("home-header")
     .append($('<h1>')
-      .text('Reddit'))
+      .text('Not Reddit'))
     .appendTo('#content2');
 
 });
@@ -134,7 +135,7 @@ module.exports = function(reddit) {
     * the given post ID
     */
     reddit.listCommentsByID = function(posts_id) {
-      $.get('/comments/' + posts_id + '/posts', {posts_id: posts_id}, function(comments) {
+      $.get('/comments/' + posts_id + '/list', {posts_id: posts_id}, function(comments) {
         // grab and clear the content element
         var content = $('#content').empty();
 
@@ -142,7 +143,6 @@ module.exports = function(reddit) {
             $('<div>').addClass("comment")
               .append($('<div>').addClass("details")
                 .append($('<h5>').text(comment.content))
-                .append($('<h6>').text('comments'))
               ).appendTo('#content');
         });
       });
@@ -188,14 +188,13 @@ module.exports = function(reddit) {
           //   reddit.listCommentsByID(comments.posts_id);
           // });
           $.ajax({
-            url: '/posts/',
+            url: '/comments/',
             type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
             success: function(data) {
-                console.log(comment.id);
-                reddit.listCommentsByID(comments.posts_id);            }});
+            }});
       }));
 
     // create the modal body and append the form
@@ -645,6 +644,7 @@ reddit.showPost = function(id) {
         .attr('id', 'comment-link')
         .on('click', function(e) {
           reddit.newComment(id);
+          reddit.showPost(id);
         }));
   }
 
@@ -653,14 +653,29 @@ reddit.showPost = function(id) {
     $('a.active').removeClass("active");
     $('#' + post.title).addClass("active");
 
+    if(post.filename) {
+      var type = post.fileType.split('/')[0];
+      var media;
+      if(type === 'video') {
+        media = $('<video>').addClass("post-media center")
+          .attr('controls', 'true')
+          .append($('<source>')
+            .attr('type', post.fileType)
+            .attr('src', post.filename));
+      } else if(type === 'image') {
+        media = $('<img>').addClass("post-media")
+          .attr('src', post.filename);
+      }
+    }
     $('<div>').addClass("post-header")
       .append($('<h1>')
         .text(post.title))
       .append($('<h4>')
         .text(post.content))
       .appendTo('#content2');
+      if(media) media.appendTo('#content2');
+      reddit.listCommentsByID(post.id);
   });
-  reddit.listCommentsByID(id);
 }
 
   function addVideoPost(post) {
@@ -719,7 +734,7 @@ reddit.showPost = function(id) {
 
   function getThumbnail(img, oldWidth, oldHeight) {
     // adjust thumbnail size
-    var maxWidth = 200;
+    var maxWidth = 125;
     var ratio = 0;
     var width = oldWidth;
     var height = oldHeight;

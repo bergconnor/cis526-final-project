@@ -34,7 +34,7 @@ module.exports = function(reddit) {
     * the given post ID
     */
     reddit.listCommentsByID = function(posts_id) {
-      $.get('/comments/' + posts_id + '/posts', {posts_id: posts_id}, function(comments) {
+      $.get('/comments/' + posts_id + '/list', {posts_id: posts_id}, function(comments) {
         // grab and clear the content element
         var content = $('#content').empty();
 
@@ -42,7 +42,6 @@ module.exports = function(reddit) {
             $('<div>').addClass("comment")
               .append($('<div>').addClass("details")
                 .append($('<h5>').text(comment.content))
-                .append($('<h6>').text('comments'))
               ).appendTo('#content');
         });
       });
@@ -88,14 +87,13 @@ module.exports = function(reddit) {
           //   reddit.listCommentsByID(comments.posts_id);
           // });
           $.ajax({
-            url: '/posts/',
+            url: '/comments/',
             type: 'POST',
             data: formData,
             processData: false,
             contentType: false,
             success: function(data) {
-                console.log(comment.id);
-                reddit.listCommentsByID(comments.posts_id);            }});
+            }});
       }));
 
     // create the modal body and append the form

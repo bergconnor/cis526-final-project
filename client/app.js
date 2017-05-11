@@ -10,6 +10,7 @@ require('./post')(reddit);
 require('./comment')(reddit);
 
 reddit.listSubpages();
+reddit.listPosts();
 
 /* Apply menu controls */
 $(document).ready(function() {
@@ -40,7 +41,7 @@ $(document).ready(function() {
   var content2 = $('#content2').empty();
   $('<div>').addClass("home-header")
     .append($('<h1>')
-      .text('Reddit'))
+      .text('Not Reddit'))
     .appendTo('#content2');
 
 });

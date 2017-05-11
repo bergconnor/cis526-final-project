@@ -146,7 +146,7 @@ function destroy(req, res, db) {
  */
 function listByID(req, res, db) {
     var posts_id = req.params.id;
-    db.all("SELECT * FROM posts WHERE posts_id=?", [posts_id], function(err, comments) {
+    db.all("SELECT * FROM comments WHERE posts_id=?", [posts_id], function(err, comments) {
       if(err) {
         console.error(err);
         res.statusCode = 500;

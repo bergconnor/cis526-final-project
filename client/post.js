@@ -395,6 +395,7 @@ reddit.showPost = function(id) {
         .attr('id', 'comment-link')
         .on('click', function(e) {
           reddit.newComment(id);
+          reddit.showPost(id);
         }));
   }
 
@@ -403,14 +404,29 @@ reddit.showPost = function(id) {
     $('a.active').removeClass("active");
     $('#' + post.title).addClass("active");
 
+    if(post.filename) {
+      var type = post.fileType.split('/')[0];
+      var media;
+      if(type === 'video') {
+        media = $('<video>').addClass("post-media center")
+          .attr('controls', 'true')
+          .append($('<source>')
+            .attr('type', post.fileType)
+            .attr('src', post.filename));
+      } else if(type === 'image') {
+        media = $('<img>').addClass("post-media")
+          .attr('src', post.filename);
+      }
+    }
     $('<div>').addClass("post-header")
       .append($('<h1>')
         .text(post.title))
       .append($('<h4>')
         .text(post.content))
       .appendTo('#content2');
+      if(media) media.appendTo('#content2');
+      reddit.listCommentsByID(post.id);
   });
-  reddit.listCommentsByID(id);
 }
 
   function addVideoPost(post) {
@@ -469,7 +485,7 @@ reddit.showPost = function(id) {
 
   function getThumbnail(img, oldWidth, oldHeight) {
     // adjust thumbnail size
-    var maxWidth = 200;
+    var maxWidth = 125;
     var ratio = 0;
     var width = oldWidth;
     var height = oldHeight;

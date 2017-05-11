@@ -15,7 +15,7 @@ db.run("DELETE FROM migrations WHERE filename='2-create-posts.sql'");
 db.run("DELETE FROM migrations WHERE filename='1-create-subpages.sql'");
 db.run("DELETE FROM migrations WHERE filename='6-create-comments.sql'");
 
-removeDirForce("./uploads/");
+/*removeDirForce("./uploads/");
 
 // path should have trailing slash
 function removeDirForce(path) {
@@ -48,4 +48,4 @@ function removeDirForce(path) {
       }
     }
   });
-}
+}*/

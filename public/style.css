@@ -9,12 +9,22 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 img {
-  height: 125px;
-  width: 125px;
+  margin: 0 auto;
+  width: 250px;
 }
 
 video {
   width: 250px;
+}
+
+/*.post-header {
+  display: flex;
+  align-items: center;
+
+}*/
+
+.post-media {
+
 }
 
 .sp-nav-header {
