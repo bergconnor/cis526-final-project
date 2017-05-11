@@ -21,7 +21,7 @@ module.exports = function(reddit) {
        comments.forEach(function(comment) {
            $('<div>').addClass("comment")
              .append($('<div>').addClass("details")
-               .append($('<h2>').text(comment.id))
+               .append($('<h4>').text(comment.id))
                .append($('<h5>').text(comment.content))
              ).appendTo('#content');
 
@@ -36,7 +36,7 @@ module.exports = function(reddit) {
     reddit.listCommentsByID = function(posts_id) {
       $.get('/comments/' + posts_id + '/posts', {posts_id: posts_id}, function(comments) {
         // grab and clear the content element
-        var content = $('#content').empty();
+        //var content = $('#content').empty();
 
         comments.forEach(function(comment) {
             $('<div>').addClass("comment")

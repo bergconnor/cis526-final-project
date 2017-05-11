@@ -47,7 +47,7 @@ function list(req, res, db) {
  * @param {sqlite3.Database} db - the database object
  */
 function create(req, res, db) {
-  multipart(req, res, function(req, res) {
+  urlencoded(req, res, function(req, res) {
     var comment = req.body;
 
     db.run('INSERT INTO comments (posts_id, user_id, content, score) VALUES (?, ?, ?, ?)', [

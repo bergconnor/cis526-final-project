@@ -9,7 +9,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 img {
-  width: 250px;
+  height: 125px;
+  width: 125px;
 }
 
 video {
@@ -133,6 +134,12 @@ a.active {
   align-items: center;
 }
 
+.comment {
+  margin: 20px 20px 0 0;
+  display: flex;
+  align-items: center;
+}
+
 .vote {
   float: left;
   margin: 0 15px 0 15px;
@@ -163,7 +170,7 @@ a.active {
 }
 
 .thumbnail-img {
-  width: 200px;
+  width: 125px;
 }
 
 .details {

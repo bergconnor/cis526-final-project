@@ -10,8 +10,6 @@ require('./post')(reddit);
 require('./comment')(reddit);
 
 reddit.listSubpages();
-reddit.listPosts();
-reddit.listComments();
 
 /* Apply menu controls */
 $(document).ready(function() {
@@ -35,6 +33,13 @@ $(document).ready(function() {
   if(comment_link) {
     comment_link.remove();
   }
+
+  var content2 = $('#content2').empty();
+  $('<div>').addClass("home-header")
+    .append($('<h1>')
+      .text('Reddit'))
+    .appendTo('#content2');
+
 });
 
 $('#home-link').on('click', function(e) {
@@ -50,9 +55,15 @@ $('#home-link').on('click', function(e) {
   comment_link.remove();
   }
 
-  reddit.listPosts();
+var content2 = $('#content2').empty();
+$('<div>').addClass("home-header")
+  .append($('<h1>')
+    .text('Reddit'))
+  .appendTo('#content2');
+
+  /*reddit.listPosts();
   $('a.active').removeClass("active");
-  $(e.target).addClass("active");
+  $(e.target).addClass("active");*/
 
 });
 

@@ -11,8 +11,6 @@ require('./post')(reddit);
 require('./comment')(reddit);
 
 reddit.listSubpages();
-reddit.listPosts();
-reddit.listComments();
 
 /* Apply menu controls */
 $(document).ready(function() {
@@ -36,6 +34,13 @@ $(document).ready(function() {
   if(comment_link) {
     comment_link.remove();
   }
+
+  var content2 = $('#content2').empty();
+  $('<div>').addClass("home-header")
+    .append($('<h1>')
+      .text('Reddit'))
+    .appendTo('#content2');
+
 });
 
 $('#home-link').on('click', function(e) {
@@ -51,9 +56,15 @@ $('#home-link').on('click', function(e) {
   comment_link.remove();
   }
 
-  reddit.listPosts();
+var content2 = $('#content2').empty();
+$('<div>').addClass("home-header")
+  .append($('<h1>')
+    .text('Reddit'))
+  .appendTo('#content2');
+
+  /*reddit.listPosts();
   $('a.active').removeClass("active");
-  $(e.target).addClass("active");
+  $(e.target).addClass("active");*/
 
 });
 
@@ -101,7 +112,7 @@ module.exports = function(reddit) {
        comments.forEach(function(comment) {
            $('<div>').addClass("comment")
              .append($('<div>').addClass("details")
-               .append($('<h2>').text(comment.id))
+               .append($('<h4>').text(comment.id))
                .append($('<h5>').text(comment.content))
              ).appendTo('#content');
 
@@ -116,7 +127,7 @@ module.exports = function(reddit) {
     reddit.listCommentsByID = function(posts_id) {
       $.get('/comments/' + posts_id + '/posts', {posts_id: posts_id}, function(comments) {
         // grab and clear the content element
-        var content = $('#content').empty();
+        //var content = $('#content').empty();
 
         comments.forEach(function(comment) {
             $('<div>').addClass("comment")
@@ -275,7 +286,7 @@ module.exports = function(reddit) {
                       reddit.showPost(post.id);
                    })
                 )
-                 .append($('<h6>').text('comments'))
+                 .append($('<h6>').text(post.content))
                ).appendTo('#content');
            }
          } else {
@@ -308,7 +319,7 @@ module.exports = function(reddit) {
                    reddit.showPost(post.id);
                 })
             )
-               .append($('<h6>').text('comments'))
+               .append($('<h6>').text(post.content))
              ).appendTo('#content');
          }
        });
@@ -364,7 +375,7 @@ module.exports = function(reddit) {
                       reddit.showPost(post.id);
                    })
                )
-                  .append($('<h6>').text('comments'))
+                  .append($('<h6>').text(post.content))
                 ).appendTo('#content');
             }
           } else {
@@ -397,7 +408,7 @@ module.exports = function(reddit) {
                     reddit.showPost(post.id);
                  })
              )
-                .append($('<h6>').text('comments'))
+                .append($('<h6>').text(post.content))
               ).appendTo('#content');
           }
         });
@@ -440,7 +451,7 @@ module.exports = function(reddit) {
         .text("Create")
         .attr('type', 'button')
         .on('click', function(e) {
-          event.preventDefault();
+          e.preventDefault();
           var formData = new FormData(form.get(0));
           formData.append('subpage_id', subpage_id);
 
@@ -674,7 +685,7 @@ reddit.showPost = function(id) {
               reddit.showPost(post.id);
            })
        )
-          .append($('<h6>').text('comments')))
+          .append($('<h6>').text(post.content)))
         .appendTo('#content');
    });
    video.addEventListener("error", function () {
