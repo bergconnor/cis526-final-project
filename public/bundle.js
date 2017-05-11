@@ -47,7 +47,7 @@ $('#home-link').on('click', function(e) {
     post_link.remove();
   }
 
-  //reddit.listPosts();
+  reddit.listPosts();
   $('a.active').removeClass("active");
   $(e.target).addClass("active");
 });
@@ -265,7 +265,7 @@ module.exports = function(reddit) {
 
 
           //if upload field amd content empty
-          if(contentLength <= 0 && files.length <= 0){
+          if(contentLength + files.length <= 0){
 
             contentLength =0;
             $.get("alert.html", function(template){
@@ -285,13 +285,14 @@ module.exports = function(reddit) {
             })
           }
 
-          //If title is too long
-          else if(titleLength > 20) {
+          //If invalid title
+          if(titleLength > 20 || titleLength <=0) {
+            titleLength=0;
             $.get("alert.html", function(template){
               var data =
               {
                   "strong_text": "Invalid input!",
-                  "text":  "Title must be shorter than 20 characters",
+                  "text":  "Title is invalid",
                   "alert_name": subpage_id
               };
 
@@ -304,31 +305,16 @@ module.exports = function(reddit) {
             })
           }
 
-          //If title is too short
-          else if(titleLength <= 0){
-            $.get("alert.html", function(template){
-              var data =
-              {
-                  "strong_text": "Invalid input!",
-                  "text":  "Title is empty",
-                  "alert_name": subpage_id
-              };
 
-              $(".alert-name").prepend(reddit.mustache.to_html(template, data));
-              window.setTimeout(function() {
-                $("div[role='alert']").fadeTo(500, 0).slideUp(500, function() {
-                  $(this).remove();
-                });
-              }, 4000);
-            })
-          }
 
           //If file inputted check size
-          else if(files.length > 0) {
+          if(files.length > 0) {
+            console.log("Here")
             var file = files[0];
             formData.append('media', file, file.name);
             var fileSize = (file.size/(1024*1024));
             if(fileSize > 100.0) {
+              console.log("xerror");
               $.get("alert.html", function(template){
                 var data =
                 {
@@ -337,7 +323,7 @@ module.exports = function(reddit) {
                     "alert_name": subpage_id
                 };
 
-                $(".alert-name").prepend(reddit.mustache.to_html(template, data));
+                $("#content").prepend(reddit.mustache.to_html(template, data));
                 window.setTimeout(function() {
                   $("div[role='alert']").fadeTo(500, 0).slideUp(500, function() {
                     $(this).remove();
@@ -347,47 +333,48 @@ module.exports = function(reddit) {
             }
           }
 
-          //Everything good
-          else{
-            $.ajax({
-              url: '/posts/',
-              type: 'POST',
-              data: formData,
-              processData: false,
-              contentType: false,
-              success: function(data) {
-                console.log('Upload successful - ' + data);
-              },
-              xhr: function() {
-                // create an XMLHttpRequest
-                var xhr = new XMLHttpRequest();
+            if(titleLength> 0 && titleLength <= 20 && contentLength + files.length > 0){
+              $.ajax({
+                url: '/posts/',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(data) {
+                  console.log('Upload successful - ' + data);
+                },
+                xhr: function() {
+                  // create an XMLHttpRequest
+                  var xhr = new XMLHttpRequest();
 
-                // listen to the 'progress' event
-                xhr.upload.addEventListener('progress', function(evt) {
-                  if (evt.lengthComputable) {
-                    // calculate the percentage of upload completed
-                    var percentComplete = evt.loaded / evt.total;
-                    percentComplete = parseInt(percentComplete * 100);
+                  // listen to the 'progress' event
+                  xhr.upload.addEventListener('progress', function(evt) {
+                    if (evt.lengthComputable) {
+                      // calculate the percentage of upload completed
+                      var percentComplete = evt.loaded / evt.total;
+                      percentComplete = parseInt(percentComplete * 100);
 
-                    // update the Bootstrap progress bar with the new percentage
-                    $('.progress-bar').text(percentComplete + '%');
-                    $('.progress-bar').width(percentComplete + '%');
+                      // update the Bootstrap progress bar with the new percentage
+                      $('.progress-bar').text(percentComplete + '%');
+                      $('.progress-bar').width(percentComplete + '%');
 
-                    // once the upload reaches 100%, set the progress bar text to done
-                    if (percentComplete === 100) {
-                      $('.progress-bar').html('Done');
-                      modal.modal('hide');
-                      setTimeout(function() {
-                        reddit.showSubpage(subpage_id);
-                      }, 1500);
+                      // once the upload reaches 100%, set the progress bar text to done
+                      if (percentComplete === 100) {
+                        $('.progress-bar').html('Done');
+                        modal.modal('hide');
+                        setTimeout(function() {
+                          reddit.showSubpage(subpage_id);
+                        }, 1500);
+                      }
                     }
-                  }
-                }, false);
+                  }, false);
 
-                return xhr;
-              }
-            });
-          }
+                  return xhr;
+                }
+              });
+            }
+
+
 
       }));
 
