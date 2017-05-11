@@ -77,6 +77,7 @@ module.exports = function(reddit) {
       .append($('<button>').addClass("btn btn-primary")
         .text("Create")
         .attr('type', 'button')
+        .attr('data-dismiss', 'modal')
         .on('click', function(e) {
           e.preventDefault();
           $.post('/comments/', form.serialize(), function(comment) {
@@ -128,7 +129,7 @@ reddit.updateComment = function(id, val) {
   $.get('/comments/' + id, (comment) => {
     comment.score += val;
     $.post('/comments/' + id, JSON.stringify(comment), function() {
-      reddit.listPosts();
+      reddit.listComments();
     });
   });
 }
