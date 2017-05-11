@@ -11,7 +11,7 @@ module.exports = {
   read: read,
   update: update,
   destroy: destroy,
-  listByPost: listByPost,
+  listByID: listByID,
   listByUser: listByUser
 }
 
@@ -138,15 +138,15 @@ function destroy(req, res, db) {
   });
 }
 
-/** @function listByPost
- * Sends a list of all comments with the given post_id as a JSON array.
+/** @function listBySubpage
+ * Sends a list of all posts with the given subpage_id as a JSON array.
  * @param {http.incomingRequest} req - the request object
  * @param {http.serverResponse} res - the response object
  * @param {sqlite3.Database} db - the database object
  */
-function listByPost(req, res, db) {
-    var post_id = req.params.id;
-    db.all("SELECT * FROM comments WHERE posts_id=?", [post_id], function(err, comments) {
+function listByID(req, res, db) {
+    var posts_id = req.params.id;
+    db.all("SELECT * FROM posts WHERE posts_id=?", [posts_id], function(err, comments) {
       if(err) {
         console.error(err);
         res.statusCode = 500;

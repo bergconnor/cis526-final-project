@@ -62,9 +62,9 @@ $('<div>').addClass("home-header")
     .text('Reddit'))
   .appendTo('#content2');
 
-  /*reddit.listPosts();
+  reddit.listPosts();
   $('a.active').removeClass("active");
-  $(e.target).addClass("active");*/
+  $(e.target).addClass("active");
 
 });
 
@@ -85,6 +85,12 @@ $('#add-subpage-link').on('click', function(e) {
   e.preventDefault();
   $('a.active').removeClass("active");
   $(e.target).addClass("active");
+  var post_link = $('#post-link')
+  
+  if(post_link) {
+    post_link.remove();
+  }
+
   reddit.newSubpage();
 });
 
@@ -127,7 +133,7 @@ module.exports = function(reddit) {
     reddit.listCommentsByID = function(posts_id) {
       $.get('/comments/' + posts_id + '/posts', {posts_id: posts_id}, function(comments) {
         // grab and clear the content element
-        //var content = $('#content').empty();
+        var content = $('#content').empty();
 
         comments.forEach(function(comment) {
             $('<div>').addClass("comment")
@@ -173,7 +179,7 @@ module.exports = function(reddit) {
           e.preventDefault();
           $.post('/comments/', form.serialize(), function(comment) {
             console.log(comment.id);
-            reddit.listComments();
+            reddit.listCommentsByID(comments.posts_id);
           });
 
       }));
@@ -220,7 +226,7 @@ reddit.updateComment = function(id, val) {
   $.get('/comments/' + id, (comment) => {
     comment.score += val;
     $.post('/comments/' + id, JSON.stringify(comment), function() {
-      reddit.listComments();
+      reddit.listCommentsByID(id);
     });
   });
 }
@@ -332,7 +338,7 @@ module.exports = function(reddit) {
     * the given subpage ID
     */
     reddit.listPostsByID = function(subpage_id) {
-      $.get('/posts/' + subpage_id + '/subpage', {subpage_id: subpage_id}, function(posts) {
+      $.get('/posts/' + subpage_id + '/list', {subpage_id: subpage_id}, function(posts) {
         // grab and clear the content element
         var content = $('#content').empty();
 
@@ -544,8 +550,7 @@ module.exports = function(reddit) {
           });
           $.post('/posts/', form.serialize(), function(post) {
             console.log(post.id);
-            reddit.listPosts();
-            reddit.showPost(post.id);
+            reddit.listPostsByID(post.subpage_id);
           });
       }));
 
@@ -597,7 +602,7 @@ reddit.updatePost = function(id, val) {
 }
 
 /** @function showPost
- * Displays the specified subpage in the
+ * Displays the specified post in the
  * content div of the page
  * @param {integer} id - the id of the subpage
  */
@@ -869,6 +874,13 @@ module.exports = function(reddit) {
                  e.preventDefault();
                  $("a.active").removeClass("active");
                  $(e.target).addClass("active");
+                 
+                 var post_link = $('#post-link')
+                 if(post_link) {
+                   post_link.remove();
+                 }
+
+
                  reddit.showSubpage(subpage.id);
               })
           ).appendTo('#subpage-list');

@@ -61,9 +61,9 @@ $('<div>').addClass("home-header")
     .text('Reddit'))
   .appendTo('#content2');
 
-  /*reddit.listPosts();
+  reddit.listPosts();
   $('a.active').removeClass("active");
-  $(e.target).addClass("active");*/
+  $(e.target).addClass("active");
 
 });
 
@@ -84,5 +84,11 @@ $('#add-subpage-link').on('click', function(e) {
   e.preventDefault();
   $('a.active').removeClass("active");
   $(e.target).addClass("active");
+  var post_link = $('#post-link')
+  
+  if(post_link) {
+    post_link.remove();
+  }
+
   reddit.newSubpage();
 });

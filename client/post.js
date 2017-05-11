@@ -102,7 +102,7 @@ module.exports = function(reddit) {
     * the given subpage ID
     */
     reddit.listPostsByID = function(subpage_id) {
-      $.get('/posts/' + subpage_id + '/subpage', {subpage_id: subpage_id}, function(posts) {
+      $.get('/posts/' + subpage_id + '/list', {subpage_id: subpage_id}, function(posts) {
         // grab and clear the content element
         var content = $('#content').empty();
 
@@ -314,8 +314,7 @@ module.exports = function(reddit) {
           });
           $.post('/posts/', form.serialize(), function(post) {
             console.log(post.id);
-            reddit.listPosts();
-            reddit.showPost(post.id);
+            reddit.listPostsByID(post.subpage_id);
           });
       }));
 
@@ -367,7 +366,7 @@ reddit.updatePost = function(id, val) {
 }
 
 /** @function showPost
- * Displays the specified subpage in the
+ * Displays the specified post in the
  * content div of the page
  * @param {integer} id - the id of the subpage
  */

@@ -36,7 +36,7 @@ module.exports = function(reddit) {
     reddit.listCommentsByID = function(posts_id) {
       $.get('/comments/' + posts_id + '/posts', {posts_id: posts_id}, function(comments) {
         // grab and clear the content element
-        //var content = $('#content').empty();
+        var content = $('#content').empty();
 
         comments.forEach(function(comment) {
             $('<div>').addClass("comment")
@@ -82,7 +82,7 @@ module.exports = function(reddit) {
           e.preventDefault();
           $.post('/comments/', form.serialize(), function(comment) {
             console.log(comment.id);
-            reddit.listComments();
+            reddit.listCommentsByID(comments.posts_id);
           });
 
       }));
@@ -129,7 +129,7 @@ reddit.updateComment = function(id, val) {
   $.get('/comments/' + id, (comment) => {
     comment.score += val;
     $.post('/comments/' + id, JSON.stringify(comment), function() {
-      reddit.listComments();
+      reddit.listCommentsByID(id);
     });
   });
 }

@@ -11,7 +11,7 @@ module.exports = {
   read: read,
   update: update,
   destroy: destroy,
-  listBySubpage: listBySubpage
+  listByID: listByID
 }
 
 var fs = require('fs');
@@ -167,7 +167,7 @@ function destroy(req, res, db) {
  * @param {http.serverResponse} res - the response object
  * @param {sqlite3.Database} db - the database object
  */
-function listBySubpage(req, res, db) {
+function listByID(req, res, db) {
     var subpage_id = req.params.id;
     db.all("SELECT * FROM posts WHERE subpage_id=?", [subpage_id], function(err, posts) {
       if(err) {

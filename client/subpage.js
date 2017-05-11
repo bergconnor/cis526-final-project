@@ -25,6 +25,13 @@ module.exports = function(reddit) {
                  e.preventDefault();
                  $("a.active").removeClass("active");
                  $(e.target).addClass("active");
+                 
+                 var post_link = $('#post-link')
+                 if(post_link) {
+                   post_link.remove();
+                 }
+
+
                  reddit.showSubpage(subpage.id);
               })
           ).appendTo('#subpage-list');
