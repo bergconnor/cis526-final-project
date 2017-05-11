@@ -18,10 +18,13 @@ $(document).ready(function() {
 
   if(reddit.isLoggedIn()) {
     $('#login-logout-icon').empty();
+    $('#login-logout-icon-text').text('Logout');
     $('#login-logout-icon').append(reddit.octicons['sign-out'].toSVG({"width": 24}));
   } else {
     $('#login-logout-icon').empty();
+     $('#login-logout-icon-text').text('Login');
     $('#login-logout-icon').append(reddit.octicons['sign-in'].toSVG({"width": 24}));
+    $('#add-subpage-link').hide();
   }
 
   var post_link = $('#post-link')
@@ -85,7 +88,7 @@ $('#add-subpage-link').on('click', function(e) {
   $('a.active').removeClass("active");
   $(e.target).addClass("active");
   var post_link = $('#post-link')
-  
+
   if(post_link) {
     post_link.remove();
   }

@@ -79,6 +79,7 @@ a.active {
   right: 0;
   background-color: #282827;
   overflow-x: hidden;
+  cursor: pointer;
 }
 
 .side-menu a {

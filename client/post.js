@@ -8,6 +8,7 @@
 module.exports = function(reddit) {
 
   reddit.octicons = require('octicons');
+  reddit.mustache = require('mustache');
 
   /** @function listPosts
    * Displays a list of posts sorted
@@ -196,6 +197,7 @@ module.exports = function(reddit) {
 
     // create the modal form
     var form = $('<form>')
+    .append($('<div>').addClass('alert-name'))
       .append($('<div>').addClass('form-group')
         .append($('<input name="title" type="text" class="form-control">')
           .attr('placeholder', "title")))
@@ -225,55 +227,56 @@ module.exports = function(reddit) {
           e.preventDefault();
           var formData = new FormData(form.get(0));
           formData.append('subpage_id', subpage_id);
+                 var titleLength = formData.get('title').length;
+                    var contentLength = form.find('input[name="content"]').val().length;
+                    var files = form.find('input[type=file]')[0].files;
 
-          if(formData.get('title').length > 20) {
-            modal.modal('hide');
-            $('<div>').addClass("alert alert-danger alert-dismissable fade show text-center")
-              .attr('role', 'alert')
-              .attr('id', 'alert-message')
-              .append($('<button>').addClass("close")
-                .attr('type', 'button')
-                .attr('data-dismiss', 'alert')
-                .attr('aria-label', 'Close')
-                .append($('<span>').html("&times;")
-                  .attr('aria-hidden', 'true')))
-              .append($('<strong>').text("Invalid title! "))
-              .append("Max title length is 20 characters.")
-              .prependTo('#content');
+
+                    //if upload field amd content empty
+                    if(contentLength + files.length <= 0){
+                      contentLength =0;
+                         $.get("alert.html", function(template){
+                          var data =
+                           {
+                               "strong_text": "Invalid input!",
+                               "text":  "Must enter Content or Upload a File.",
+                               "alert_name": subpage_id
+                           };
+
+                           $(".alert-name").prepend(reddit.mustache.to_html(template, data));
               window.setTimeout(function() {
-                $("#alert-message").fadeTo(500, 0).slideUp(500, function() {
-                  $(this).remove();
-                });
-              }, 4000);
-          }
+                $("div[role='alert']").fadeTo(500, 0).slideUp(500, function() {
+                                   $(this).remove();
+                                 });
+                               }, 4000);
+                            })
+                           }
 
-          var files = form.find('input[type=file]')[0].files;
+
+
           if(files.length > 0) {
             var file = files[0];
             formData.append('media', file, file.name);
             var fileSize = (file.size/(1024*1024));
             if(fileSize > 100.0) {
-              modal.modal('hide');
-              $('<div>').addClass("alert alert-danger alert-dismissable fade show text-center")
-                .attr('role', 'alert')
-                .attr('id', 'alert-message')
-                .append($('<button>').addClass("close")
-                  .attr('type', 'button')
-                  .attr('data-dismiss', 'alert')
-                  .attr('aria-label', 'Close')
-                  .append($('<span>').html("&times;")
-                    .attr('aria-hidden', 'true')))
-                .append($('<strong>').text("File size too large! "))
-                .append("Files must be less than 100MB.")
-                .prependTo('#content');
+              $.get("alert.html", function(template){
+              var data =
+                {
+                    "strong_text": "File size too large!",
+                    "text":  "Files must be less than 100MB.",
+                    "alert_name": subpage_id
+                };
+
+                $("#content").prepend(reddit.mustache.to_html(template, data));
                 window.setTimeout(function() {
-                  $("#alert-message").fadeTo(500, 0).slideUp(500, function() {
-                    $(this).remove();
-                  });
-                }, 4000);
+                  $("div[role='alert']").fadeTo(500, 0).slideUp(500, function() {
+                     $(this).remove();
+                   });
+                 }, 4000);
+             })
             }
           }
-
+ if(titleLength> 0 && titleLength <= 20 && contentLength + files.length > 0){
           $.ajax({
             url: '/posts/',
             type: 'POST',
@@ -311,7 +314,8 @@ module.exports = function(reddit) {
 
               return xhr;
             }
-          });
+
+          });}
           $.post('/posts/', form.serialize(), function(post) {
             console.log(post.id);
             reddit.listPostsByID(post.subpage_id);
