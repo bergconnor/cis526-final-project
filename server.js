@@ -72,10 +72,10 @@ var server = new http.Server(function(req, res) {
 // launch the server
 server.listen(PORT, function(){
   console.log("listening on port " + PORT);
-  db.all('SELECT * from posts', function(err, table) {
+  // db.all('SELECT * from posts', function(err, table) {
   // console.log(table);
   //  });
   //  db.all('SELECT * from comments', function(err, table) {
   //  console.log(table);
-    });
+    // });
 });

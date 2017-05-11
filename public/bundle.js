@@ -63,7 +63,7 @@ $('#home-link').on('click', function(e) {
 var content2 = $('#content2').empty();
 $('<div>').addClass("home-header")
   .append($('<h1>')
-    .text('Reddit'))
+    .text('Not Reddit'))
   .appendTo('#content2');
 
   reddit.listPosts();
