@@ -28,7 +28,7 @@ module.exports = function(reddit) {
              var img = $('<img>').addClass("thumbnail-img")
                .attr("src", post.filename);
              $('<div>').addClass("post")
-             .append($('<div>').addClass("vote")
+               .append($('<div>').addClass("vote")
                .append($('<div>').addClass("upvote")
                  .append($('<a>')
                    .append(reddit.octicons['arrow-up'].toSVG({"width": 20}))
@@ -46,7 +46,17 @@ module.exports = function(reddit) {
                .append($('<a>').addClass("thumbnail-link")
                  .append(img))
                .append($('<div>').addClass("details")
-                 .append($('<h5>').text(post.title))
+               .append($('<a>')
+                    .attr("href", "/")
+                    .attr("id", post.title)
+                    .text(post.title)
+                    .on('click', (e) => {
+                      e.preventDefault();
+                      $("a.active").removeClass("active");
+                      $(e.target).addClass("active");
+                      reddit.showPost(post.id);
+                   })
+                )
                  .append($('<h6>').text('comments'))
                ).appendTo('#content');
            }
@@ -68,7 +78,18 @@ module.exports = function(reddit) {
                    reddit.updatePost(post.id, -1);
                  }))))
              .append($('<div>').addClass("details")
-               .append($('<h5>').text(post.title))
+             .append(
+               $('<a>')
+                 .attr("href", "/")
+                 .attr("id", post.title)
+                 .text(post.title)
+                 .on('click', (e) => {
+                   e.preventDefault();
+                   $("a.active").removeClass("active");
+                   $(e.target).addClass("active");
+                   reddit.showPost(post.id);
+                })
+            )
                .append($('<h6>').text('comments'))
              ).appendTo('#content');
          }
@@ -83,7 +104,7 @@ module.exports = function(reddit) {
     reddit.listPostsByID = function(subpage_id) {
       $.get('/posts/' + subpage_id + '/subpage', {subpage_id: subpage_id}, function(posts) {
         // grab and clear the content element
-        var content = $('#content');
+        var content = $('#content').empty();
 
         posts.forEach(function(post) {
           if(post.filename) {
@@ -113,7 +134,18 @@ module.exports = function(reddit) {
                 .append($('<a>').addClass("thumbnail-link")
                   .append(img))
                 .append($('<div>').addClass("details")
-                  .append($('<h5>').text(post.title))
+                .append(
+                  $('<a>')
+                    .attr("href", "/")
+                    .attr("id", post.title)
+                    .text(post.title)
+                    .on('click', (e) => {
+                      e.preventDefault();
+                      $("a.active").removeClass("active");
+                      $(e.target).addClass("active");
+                      reddit.showPost(post.id);
+                   })
+               )
                   .append($('<h6>').text('comments'))
                 ).appendTo('#content');
             }
@@ -135,7 +167,18 @@ module.exports = function(reddit) {
                     reddit.updatePost(post.id, -1);
                   }))))
               .append($('<div>').addClass("details")
-                .append($('<h5>').text(post.title))
+              .append(
+                $('<a>')
+                  .attr("href", "/")
+                  .attr("id", post.title)
+                  .text(post.title)
+                  .on('click', (e) => {
+                    e.preventDefault();
+                    $("a.active").removeClass("active");
+                    $(e.target).addClass("active");
+                    reddit.showPost(post.id);
+                 })
+             )
                 .append($('<h6>').text('comments'))
               ).appendTo('#content');
           }
@@ -269,6 +312,11 @@ module.exports = function(reddit) {
               return xhr;
             }
           });
+          $.post('/posts/', form.serialize(), function(post) {
+            console.log(post.id);
+            reddit.listPosts();
+            reddit.showPost(post.id);
+          });
       }));
 
     // create the modal body and append the form
@@ -318,6 +366,50 @@ reddit.updatePost = function(id, val) {
   });
 }
 
+/** @function showPost
+ * Displays the specified subpage in the
+ * content div of the page
+ * @param {integer} id - the id of the subpage
+ */
+reddit.showPost = function(id) {
+  // grab and clear the content element
+  var content = $('#content').empty();
+  var content2 = $('#content2').empty();
+
+  var post_link = $('#post-link')
+  if(post_link) {
+    post_link.remove();
+  }
+
+  if($('#comment-link', '#side-menu').length != 1) {
+    // add a menu item to add a post
+    $('#side-menu')
+      .append($('<div>').addClass("menu-item")
+        .append($('<span>').addClass("menu-item-icon")
+          .append(reddit.octicons.comment.toSVG({"width": 24})))
+        .append($('<span>').addClass("hover-text")
+          .text("Add Comment"))
+        .attr('id', 'comment-link')
+        .on('click', function(e) {
+          reddit.newComment(id);
+        }));
+  }
+
+  $.get('/posts/' + id, function(post) {
+    // change the active tabe
+    $('a.active').removeClass("active");
+    $('#' + post.title).addClass("active");
+
+    $('<div>').addClass("post-header")
+      .append($('<h1>')
+        .text(post.title))
+      .append($('<h4>')
+        .text(post.content))
+      .appendTo('#content2');
+  });
+  reddit.listCommentsByID(id);
+}
+
   function addVideoPost(post) {
     var video = $('<video>')
       .append($('<source>')
@@ -352,7 +444,18 @@ reddit.updatePost = function(id, val) {
         .append($('<a>').addClass("thumbnail-link")
           .append(img))
         .append($('<div>').addClass("details")
-          .append($('<h5>').text(post.title))
+        .append(
+          $('<a>')
+            .attr("href", "/")
+            .attr("id", post.title)
+            .text(post.title)
+            .on('click', (e) => {
+              e.preventDefault();
+              $("a.active").removeClass("active");
+              $(e.target).addClass("active");
+              reddit.showPost(post.id);
+           })
+       )
           .append($('<h6>').text('comments')))
         .appendTo('#content');
    });

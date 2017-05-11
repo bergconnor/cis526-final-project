@@ -20,24 +20,9 @@ module.exports = function(reddit) {
      $.get('/comments/', function(comments) {
        comments.forEach(function(comment) {
            $('<div>').addClass("comment")
-           .append($('<div>').addClass("vote")
-             .append($('<div>').addClass("upvote")
-               .append($('<a>')
-                 .append(reddit.octicons['arrow-up'].toSVG({"width": 20}))
-                 .on('click', function(e) {
-                   reddit.updateComment(comment.id, 1);
-                 })))
-             .append($('<div>').addClass("score")
-               .text(comment.score))
-             .append($('<div>').addClass("downvote")
-               .append($('<a>')
-                 .append(reddit.octicons['arrow-down'].toSVG({"width": 20}))
-                 .on('click', function(e) {
-                   reddit.updateComment(comment.id, -1);
-                 }))))
              .append($('<div>').addClass("details")
+               .append($('<h2>').text(comment.id))
                .append($('<h5>').text(comment.content))
-               .append($('<h6>').text('comments'))
              ).appendTo('#content');
 
        });
@@ -48,28 +33,13 @@ module.exports = function(reddit) {
     * Displays a list of comments with
     * the given post ID
     */
-    reddit.listCommentsByID = function(post_id) {
+    reddit.listCommentsByID = function(posts_id) {
       $.get('/comments/' + posts_id + '/posts', {posts_id: posts_id}, function(comments) {
         // grab and clear the content element
-        var content = $('#content');
+        var content = $('#content').empty();
 
         comments.forEach(function(comment) {
             $('<div>').addClass("comment")
-            .append($('<div>').addClass("vote")
-              .append($('<div>').addClass("upvote")
-                .append($('<a>')
-                  .append(reddit.octicons['arrow-up'].toSVG({"width": 20}))
-                  .on('click', function(e) {
-                    reddit.updateComment(post.id, 1);
-                  })))
-              .append($('<div>').addClass("score")
-                .text(comment.score))
-              .append($('<div>').addClass("downvote")
-                .append($('<a>')
-                  .append(reddit.octicons['arrow-down'].toSVG({"width": 20}))
-                  .on('click', function(e) {
-                    reddit.updateComment(comment.id, -1);
-                  }))))
               .append($('<div>').addClass("details")
                 .append($('<h5>').text(comment.content))
                 .append($('<h6>').text('comments'))
@@ -82,7 +52,7 @@ module.exports = function(reddit) {
    * Displays a form to create a new project
    * in the page's content div
    */
-  reddit.newPost = function(posts_id) {
+  reddit.newComment = function(posts_id) {
     // set the modal title
     var title = "Create Comment";
 
@@ -108,69 +78,12 @@ module.exports = function(reddit) {
         .text("Create")
         .attr('type', 'button')
         .on('click', function(e) {
-          event.preventDefault();
-          var formData = new FormData(form.get(0));
-          formData.append('posts_id', posts_id);
-
-          if(formData.get('content').length > 50) {
-            modal.modal('hide');
-            $('<div>').addClass("alert alert-danger alert-dismissable fade show text-center")
-              .attr('role', 'alert')
-              .attr('id', 'alert-message')
-              .append($('<button>').addClass("close")
-                .attr('type', 'button')
-                .attr('data-dismiss', 'alert')
-                .attr('aria-label', 'Close')
-                .append($('<span>').html("&times;")
-                  .attr('aria-hidden', 'true')))
-              .append($('<strong>').text("Invalid comment! "))
-              .append("Max content length is 50 characters.")
-              .prependTo('#content');
-              window.setTimeout(function() {
-                $("#alert-message").fadeTo(500, 0).slideUp(500, function() {
-                  $(this).remove();
-                });
-              }, 4000);
-          }
-
-          $.ajax({
-            url: '/comments/',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(data) {
-              console.log('Upload successful - ' + data);
-            },
-            xhr: function() {
-              // create an XMLHttpRequest
-              var xhr = new XMLHttpRequest();
-
-              // listen to the 'progress' event
-              xhr.upload.addEventListener('progress', function(evt) {
-                if (evt.lengthComputable) {
-                  // calculate the percentage of upload completed
-                  var percentComplete = evt.loaded / evt.total;
-                  percentComplete = parseInt(percentComplete * 100);
-
-                  // update the Bootstrap progress bar with the new percentage
-                  $('.progress-bar').text(percentComplete + '%');
-                  $('.progress-bar').width(percentComplete + '%');
-
-                  // once the upload reaches 100%, set the progress bar text to done
-                  if (percentComplete === 100) {
-                    $('.progress-bar').html('Done');
-                    modal.modal('hide');
-                    setTimeout(function() {
-                      reddit.showPost(posts_id);
-                    }, 1500);
-                  }
-                }
-              }, false);
-
-              return xhr;
-            }
+          e.preventDefault();
+          $.post('/comments/', form.serialize(), function(comment) {
+            console.log(comment.id);
+            reddit.listComments();
           });
+
       }));
 
     // create the modal body and append the form

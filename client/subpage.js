@@ -110,6 +110,12 @@ module.exports = function(reddit) {
   reddit.showSubpage = function(id) {
     // grab and clear the content element
     var content = $('#content').empty();
+    var content2 = $('#content2').empty();
+
+    var comment_link = $('#comment-link')
+    if(comment_link) {
+      comment_link.remove();
+    }
 
     if($('#post-link', '#side-menu').length != 1) {
       // add a menu item to add a post
@@ -135,7 +141,7 @@ module.exports = function(reddit) {
           .text(subpage.name))
         .append($('<h4>')
           .text(subpage.description))
-        .appendTo('#content');
+        .appendTo('#content2');
     });
     reddit.listPostsByID(id);
   }

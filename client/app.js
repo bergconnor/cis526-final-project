@@ -7,9 +7,11 @@ require('./user')(reddit);
 require('./session')(reddit);
 require('./subpage')(reddit);
 require('./post')(reddit);
+require('./comment')(reddit);
 
 reddit.listSubpages();
 reddit.listPosts();
+reddit.listComments();
 
 /* Apply menu controls */
 $(document).ready(function() {
@@ -28,19 +30,30 @@ $(document).ready(function() {
   if(post_link) {
     post_link.remove();
   }
+
+  var comment_link = $('#comment-link')
+  if(comment_link) {
+    comment_link.remove();
+  }
 });
 
 $('#home-link').on('click', function(e) {
   e.preventDefault();
-  
+
   var post_link = $('#post-link')
   if(post_link) {
     post_link.remove();
   }
 
+  var comment_link = $('#comment-link')
+  if(comment_link) {
+  comment_link.remove();
+  }
+
   reddit.listPosts();
   $('a.active').removeClass("active");
   $(e.target).addClass("active");
+
 });
 
 $('#login-logout-link').on('click', function(e) {

@@ -5,7 +5,7 @@
 "use strict";
 
 // constants
-var PORT = 3000;
+var PORT = 3100;
 var SESSION = "encryptedSession";
 
 // requires
@@ -28,10 +28,12 @@ var post = require('./src/resource/post');
 var subpage = require('./src/resource/subpage');
 var user = require('./src/resource/user');
 var session = require('./src/resource/session');
+var comment = require('./src/resource/comment');
 router.resource('/posts', post);
 router.resource('/subpages', subpage);
 router.resource('/users', user);
 router.resource('/sessions', session);
+router.resource('/comments', comment);
 
 var server = new http.Server(function(req, res) {
   // check for a session cookie to determine
