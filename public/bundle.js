@@ -333,7 +333,7 @@ module.exports = function(reddit) {
             }
           }
 
-            if(titleLength> 0 && titleLength <= 20 && contentLength + files.length > 0){
+          if(titleLength> 0 && titleLength <= 20 && contentLength + files.length > 0){
               $.ajax({
                 url: '/posts/',
                 type: 'POST',
