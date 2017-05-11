@@ -8,6 +8,7 @@
 module.exports = function(reddit) {
 
   reddit.octicons = require('octicons');
+  reddit.mustache = require('mustache');
 
   /** @function listPosts
    * Displays a list of posts sorted
@@ -153,6 +154,7 @@ module.exports = function(reddit) {
 
     // create the modal form
     var form = $('<form>')
+    .append($('<div>').addClass('alert-name'))
       .append($('<div>').addClass('form-group')
         .append($('<input name="title" type="text" class="form-control">')
           .attr('placeholder', "title")))
@@ -182,93 +184,136 @@ module.exports = function(reddit) {
           event.preventDefault();
           var formData = new FormData(form.get(0));
           formData.append('subpage_id', subpage_id);
+          var titleLength = formData.get('title').length;
+          var contentLength = form.find('input[name="content"]').val().length;
+          var files = form.find('input[type=file]')[0].files;
 
-          if(formData.get('title').length > 20) {
-            modal.modal('hide');
-            $('<div>').addClass("alert alert-danger alert-dismissable fade show text-center")
-              .attr('role', 'alert')
-              .attr('id', 'alert-message')
-              .append($('<button>').addClass("close")
-                .attr('type', 'button')
-                .attr('data-dismiss', 'alert')
-                .attr('aria-label', 'Close')
-                .append($('<span>').html("&times;")
-                  .attr('aria-hidden', 'true')))
-              .append($('<strong>').text("Invalid title! "))
-              .append("Max title length is 20 characters.")
-              .prependTo('#content');
+
+          //if upload field amd content empty
+          if(contentLength <= 0 && files.length <= 0){
+
+            contentLength =0;
+            $.get("alert.html", function(template){
+              var data =
+              {
+                  "strong_text": "Invalid input!",
+                  "text":  "Must enter Content or Upload a File.",
+                  "alert_name": subpage_id
+              };
+
+              $(".alert-name").prepend(reddit.mustache.to_html(template, data));
               window.setTimeout(function() {
-                $("#alert-message").fadeTo(500, 0).slideUp(500, function() {
+                $("div[role='alert']").fadeTo(500, 0).slideUp(500, function() {
                   $(this).remove();
                 });
               }, 4000);
+            })
           }
 
-          var files = form.find('input[type=file]')[0].files;
-          if(files.length > 0) {
+          //If title is too long
+          else if(titleLength > 20) {
+            $.get("alert.html", function(template){
+              var data =
+              {
+                  "strong_text": "Invalid input!",
+                  "text":  "Title must be shorter than 20 characters",
+                  "alert_name": subpage_id
+              };
+
+              $(".alert-name").prepend(reddit.mustache.to_html(template, data));
+              window.setTimeout(function() {
+                $("div[role='alert']").fadeTo(500, 0).slideUp(500, function() {
+                  $(this).remove();
+                });
+              }, 4000);
+            })
+          }
+
+          //If title is too short
+          else if(titleLength <= 0){
+            $.get("alert.html", function(template){
+              var data =
+              {
+                  "strong_text": "Invalid input!",
+                  "text":  "Title is empty",
+                  "alert_name": subpage_id
+              };
+
+              $(".alert-name").prepend(reddit.mustache.to_html(template, data));
+              window.setTimeout(function() {
+                $("div[role='alert']").fadeTo(500, 0).slideUp(500, function() {
+                  $(this).remove();
+                });
+              }, 4000);
+            })
+          }
+
+          //If file inputted check size
+          else if(files.length > 0) {
             var file = files[0];
             formData.append('media', file, file.name);
             var fileSize = (file.size/(1024*1024));
             if(fileSize > 100.0) {
-              modal.modal('hide');
-              $('<div>').addClass("alert alert-danger alert-dismissable fade show text-center")
-                .attr('role', 'alert')
-                .attr('id', 'alert-message')
-                .append($('<button>').addClass("close")
-                  .attr('type', 'button')
-                  .attr('data-dismiss', 'alert')
-                  .attr('aria-label', 'Close')
-                  .append($('<span>').html("&times;")
-                    .attr('aria-hidden', 'true')))
-                .append($('<strong>').text("File size too large! "))
-                .append("Files must be less than 100MB.")
-                .prependTo('#content');
+              $.get("alert.html", function(template){
+                var data =
+                {
+                    "strong_text": "File size too large!",
+                    "text":  "Files must be less than 100MB.",
+                    "alert_name": subpage_id
+                };
+
+                $(".alert-name").prepend(reddit.mustache.to_html(template, data));
                 window.setTimeout(function() {
-                  $("#alert-message").fadeTo(500, 0).slideUp(500, function() {
+                  $("div[role='alert']").fadeTo(500, 0).slideUp(500, function() {
                     $(this).remove();
                   });
                 }, 4000);
+              })
             }
           }
 
-          $.ajax({
-            url: '/posts/',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(data) {
-              console.log('Upload successful - ' + data);
-            },
-            xhr: function() {
-              // create an XMLHttpRequest
-              var xhr = new XMLHttpRequest();
+          //Everything good
+          else{
+            $.ajax({
+              url: '/posts/',
+              type: 'POST',
+              data: formData,
+              processData: false,
+              contentType: false,
+              success: function(data) {
+                console.log('Upload successful - ' + data);
+              },
+              xhr: function() {
+                // create an XMLHttpRequest
+                var xhr = new XMLHttpRequest();
 
-              // listen to the 'progress' event
-              xhr.upload.addEventListener('progress', function(evt) {
-                if (evt.lengthComputable) {
-                  // calculate the percentage of upload completed
-                  var percentComplete = evt.loaded / evt.total;
-                  percentComplete = parseInt(percentComplete * 100);
+                // listen to the 'progress' event
+                xhr.upload.addEventListener('progress', function(evt) {
+                  if (evt.lengthComputable) {
+                    // calculate the percentage of upload completed
+                    var percentComplete = evt.loaded / evt.total;
+                    percentComplete = parseInt(percentComplete * 100);
 
-                  // update the Bootstrap progress bar with the new percentage
-                  $('.progress-bar').text(percentComplete + '%');
-                  $('.progress-bar').width(percentComplete + '%');
+                    // update the Bootstrap progress bar with the new percentage
+                    $('.progress-bar').text(percentComplete + '%');
+                    $('.progress-bar').width(percentComplete + '%');
 
-                  // once the upload reaches 100%, set the progress bar text to done
-                  if (percentComplete === 100) {
-                    $('.progress-bar').html('Done');
-                    modal.modal('hide');
-                    setTimeout(function() {
-                      reddit.showSubpage(subpage_id);
-                    }, 1500);
+                    // once the upload reaches 100%, set the progress bar text to done
+                    if (percentComplete === 100) {
+                      $('.progress-bar').html('Done');
+                      modal.modal('hide');
+                      setTimeout(function() {
+                        reddit.showSubpage(subpage_id);
+                      }, 1500);
+                    }
                   }
-                }
-              }, false);
+                }, false);
 
-              return xhr;
-            }
-          });
+                return xhr;
+              }
+            });
+          }
+
       }));
 
     // create the modal body and append the form

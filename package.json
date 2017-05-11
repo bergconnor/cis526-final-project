@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/bergconnor/cis526-final-project#readme",
   "dependencies": {
+    "mustache": "^2.3.0",
     "octicons": "^5.0.1",
     "sqlite3": "3.1.8"
   },

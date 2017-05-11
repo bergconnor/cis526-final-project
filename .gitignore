@@ -4,9 +4,7 @@
 # Config file
 config.json
 
-# Uploads
-uploads/*
-!uploads/.gitkeep
+
 
 # Logs
 logs

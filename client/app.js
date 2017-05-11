@@ -25,7 +25,7 @@ $(document).ready(function() {
   } else {
     $('#login-logout-icon').empty();
     $('#login-logout-icon-text').text('Login');
-    
+
     $('#login-logout-icon').append(reddit.octicons['sign-in'].toSVG({"width": 24}));
     $('#add-subpage-link').hide();
 

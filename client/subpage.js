@@ -42,6 +42,7 @@ module.exports = function(reddit) {
 
     // create the modal form
     var form = $('<form>')
+      .append($('<div>').addClass('alert-name'))
       .append($('<div>').addClass('form-group')
         .append($('<input name="name" type="text" class="form-control">')
           .attr('placeholder', "name")))
@@ -59,14 +60,65 @@ module.exports = function(reddit) {
       .append($('<button>').addClass("btn btn-primary")
         .text("Create")
         .attr('type', 'button')
-        .attr('data-dismiss', 'modal')
+        //.attr('data-dismiss', 'modal')
         .on('click', function(e) {
           e.preventDefault();
-          $.post('/subpages/', form.serialize(), function(subpage) {
-            console.log(subpage.id);
-            reddit.listSubpages();
-            reddit.showSubpage(subpage.id);
-          });
+          var nameLength = form.find("input[name='name']").val().length;
+
+          //Alert if name is too large
+          if(nameLength > 20){
+            nameLength =0;
+            //modal.modal('hide');
+            $('<div>').addClass("alert alert-danger alert-dismissable fade show text-center")
+              .attr('role', 'alert')
+              .attr('id', 'alert-message')
+              .append($('<button>').addClass("close")
+                .attr('type', 'button')
+                .attr('data-dismiss', 'alert')
+                .attr('aria-label', 'Close')
+                .append($('<span>').html("&times;")
+                  .attr('aria-hidden', 'true')))
+              .append($('<strong>').text("Invalid name! "))
+              .append("Max name length is 20 characters.")
+              .prependTo('.alert-name');
+              window.setTimeout(function() {
+                $("#alert-message").fadeTo(500, 0).slideUp(500, function() {
+                  $(this).remove();
+                });
+              }, 4000);
+          }
+
+          //Alert if name is empty
+          else if(nameLength <= 0){
+            nameLength = 0;
+            //modal.modal('hide');
+            $('<div>').addClass("alert alert-danger alert-dismissable fade show text-center")
+              .attr('role', 'alert')
+              .attr('id', 'alert-message')
+              .append($('<button>').addClass("close")
+                .attr('type', 'button')
+                .attr('data-dismiss', 'alert')
+                .attr('aria-label', 'Close')
+                .append($('<span>').html("&times;")
+                  .attr('aria-hidden', 'true')))
+              .append($('<strong>').text("Invalid name! "))
+              .append("Name field is empty")
+              .prependTo('.alert-name');
+              window.setTimeout(function() {
+                $("#alert-message").fadeTo(500, 0).slideUp(500, function() {
+                  $(this).remove();
+                });
+              }, 4000);
+          }
+
+          else{
+            modal.modal('hide');
+            $.post('/subpages/', form.serialize(), function(subpage) {
+              console.log(subpage.id);
+              reddit.listSubpages();
+              reddit.showSubpage(subpage.id);
+
+          });}
         }));
 
     // create the modal body and append the form
