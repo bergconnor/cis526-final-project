@@ -164,6 +164,7 @@ module.exports = function(reddit) {
           .height(20)
           .width(0)));
 
+
     // creat the modal footer
     var modalFooter = $('<div>').addClass("modal-footer")
       .append($('<button>').addClass("btn btn-secondary")
@@ -177,11 +178,21 @@ module.exports = function(reddit) {
         .attr('data-dismiss', 'modal')
         .on('click', function(e) {
           e.preventDefault();
-          $.post('/comments/', form.serialize(), function(comment) {
-            console.log(comment.id);
-            reddit.listCommentsByID(comments.posts_id);
-          });
-
+          var formData = new FormData(form.get(0));
+          formData.append('posts_id', posts_id);
+          // $.post('/comments/' , form.serialize(), function(comment) {
+          //   console.log(comment.id);
+          //   reddit.listCommentsByID(comments.posts_id);
+          // });
+          $.ajax({
+            url: '/posts/',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                console.log(comment.id);
+                reddit.listCommentsByID(comments.posts_id);            }});
       }));
 
     // create the modal body and append the form
